@@ -25,6 +25,26 @@ export function formatDate(isoDate, language = 'en') {
   }).format(new Date(year, month - 1, day));
 }
 
+/** Start date, or "start – end" for multi-day work. */
+export function formatDateRange(startDate, endDate, language = 'en') {
+  const start = formatDate(startDate, language);
+  if (!endDate || endDate === startDate) return start;
+  return `${start} – ${formatDate(endDate, language)}`;
+}
+
+/** ISO timestamp → "22 Nov 2026" in the reader's language. */
+export function formatTimestamp(iso, language = 'en') {
+  return new Intl.DateTimeFormat(toLocale(language), { day: 'numeric', month: 'short', year: 'numeric' }).format(
+    new Date(iso),
+  );
+}
+
+/** Picks nameKn / nameEn from bilingual reference data (categories, districts). */
+export function localName(item, language = 'en') {
+  if (!item) return '';
+  return (language === 'kn' ? item.nameKn : item.nameEn) ?? item.nameEn ?? '';
+}
+
 /** '08:00' → "8:00 am" (en) / Kannada equivalent. */
 export function formatTime(hhmm, language = 'en') {
   const [hours, minutes] = hhmm.split(':').map(Number);

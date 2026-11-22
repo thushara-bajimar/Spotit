@@ -111,6 +111,98 @@ Returned only to the user themselves. It never includes the password hash.
 
 `employer` is `null` for workers and admins.
 
+## Worker marketplace (Phase 3)
+
+All of these require a signed-in **worker**: no session gets 401, any other role gets 403.
+
+**Availability.** A job is *available* when all of these are true:
+- `approval_status = approved` and `status = open`
+- it has a free place
+- its last working day is today or later (India time)
+- its employer is active and approved
+
+Open jobs whose dates have passed are marked `expired` automatically.
+
+### `GET /api/worker/jobs`
+Lists available jobs. All query parameters are optional:
+
+| Param | Meaning |
+|---|---|
+| `q` | Keywords (max 100 chars). Every word must match the title, description, requirements, skills, locality or category name (EN/KN). |
+| `category` | Category slug |
+| `district` | District id |
+| `wageBasis` | `per_hour` \| `per_day` \| `per_week` \| `per_task` |
+| `minWage` | Minimum `wageAmount` (whole rupees) |
+| `duration` | `few_hours` \| `one_day` \| `multiple_days` \| `short_term` |
+| `date` | `YYYY-MM-DD`. Returns jobs running on that day. |
+| `sort` | `newest` (default) \| `soonest` \| `wage_high` \| `wage_low` |
+| `page` | Page number. There are 12 jobs per page. |
+
+**200** →
+```json
+{ "jobs": [JobSummary], "page": 1, "pageSize": 12, "total": 11, "totalPages": 1 }
+```
+
+`JobSummary` contains:
+- `id`, `title`
+- `category {slug,nameEn,nameKn,icon}`, `district {id,nameEn,nameKn}`, `locality`
+- `startDate`, `endDate`, `startTime`, `endTime`, `durationType`
+- `wageAmount`, `wageBasis`, `workersRequired`, `vacancies`, `status`, `postedAt`
+- `employer {name, type, verified}`
+- `myApplicationStatus` (`null` if the worker has not applied)
+
+It never contains the employer's phone number or the job address.
+
+### `GET /api/worker/jobs/:jobId`
+Returns `{ job }`: a `JobSummary` plus these fields:
+- `description`, `requirements`, `skills`, `employer.memberSince`
+- `availability: { canApply, reason }`. `reason` is null, or one of `not_approved`,
+  `employer_unavailable`, `filled`, `closed`, `cancelled`, `expired`, `in_progress`, `completed`,
+  `draft` or `no_vacancies`.
+- `myApplication`, which is `null` or `{ id, status, message, appliedAt, decidedAt, withdrawnAt }`.
+- `contact`, which is `{ phone, address }` **only when this worker's application was accepted**, and
+  `null` otherwise.
+
+Visibility:
+- Approved jobs are visible even when they are no longer open, so the page can explain why.
+- Unapproved jobs, unknown ids and jobs from suspended employers return 404 `JOB_NOT_FOUND`, unless the
+  worker already applied to that job.
+
+### `POST /api/worker/jobs/:jobId/applications`
+Body: `{ "message"?: string }` (max 500 characters). This applies to the job, or applies again after
+a withdrawal (the same row is reused).
+
+**201** → `{ application }`. It also creates an `application_received` notification for the employer.
+
+| Error | When |
+|---|---|
+| 409 `ALREADY_APPLIED` | An application is already pending, accepted or rejected. `details.status` says which. |
+| 409 `JOB_UNAVAILABLE` | The job is not available. `details.reason` uses the values listed above. |
+| 404 `JOB_NOT_FOUND` | The job is unapproved, unknown, or its employer is suspended |
+
+The check and the insert happen in one `IMMEDIATE` transaction. Database triggers also refuse
+applications to unavailable jobs.
+
+### `GET /api/worker/applications?status=`
+Returns only the signed-in worker's applications, newest first. `status` is optional: `pending`,
+`accepted`, `rejected` or `withdrawn`.
+
+**200** →
+```json
+{ "applications": [ { "id", "status", "message", "appliedAt", "decidedAt", "withdrawnAt", "canWithdraw",
+                      "job": JobSummary + "unavailableReason" } ],
+  "counts": { "pending", "accepted", "rejected", "withdrawn" } }
+```
+
+### `POST /api/worker/applications/:id/withdraw`
+Only **pending** applications can be withdrawn.
+
+**200** → `{ application }`
+
+Errors:
+- 409 `CANNOT_WITHDRAW` for any other status. `details.status` gives the current status.
+- 404 `APPLICATION_NOT_FOUND` when the application belongs to someone else or does not exist.
+
 ## Role-protected endpoints
 
 Every route under these paths checks the role on the server.

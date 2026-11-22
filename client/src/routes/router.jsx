@@ -9,6 +9,11 @@ import { RegisterPage } from '../pages/auth/RegisterPage.jsx';
 import { RegisterWorkerPage } from '../pages/auth/RegisterWorkerPage.jsx';
 import { RegisterEmployerPage } from '../pages/auth/RegisterEmployerPage.jsx';
 import { GuestOnly, RequireRole } from './guards.jsx';
+import { WorkerHomePage } from '../pages/worker/WorkerHomePage.jsx';
+import { JobsPage } from '../pages/worker/JobsPage.jsx';
+import { JobDetailsPage } from '../pages/worker/JobDetailsPage.jsx';
+import { MyWorkPage } from '../pages/worker/MyWorkPage.jsx';
+import { WorkerProfilePage } from '../pages/worker/WorkerProfilePage.jsx';
 import { PlaceholderPage } from '../pages/dashboard/PlaceholderPage.jsx';
 import { NotFoundPage } from '../pages/NotFoundPage.jsx';
 import { adminNav, employerNav, employerNotifications, workerNav } from './navigation.js';
@@ -59,7 +64,21 @@ export const router = createBrowserRouter([
       },
       {
         element: <RequireRole roles={['worker']} />,
-        children: [{ path: 'worker', element: <WorkerLayout />, children: placeholderRoutes(workerNav) }],
+        children: [
+          {
+            path: 'worker',
+            element: <WorkerLayout />,
+            children: [
+              { index: true, element: <WorkerHomePage /> },
+              { path: 'jobs', element: <JobsPage /> },
+              { path: 'jobs/:jobId', element: <JobDetailsPage /> },
+              { path: 'my-work', element: <MyWorkPage /> },
+              { path: 'profile', element: <WorkerProfilePage /> },
+              // Still planned (see navigation.js for the phase).
+              ...placeholderRoutes(workerNav.filter((item) => item.segment === 'notifications')),
+            ],
+          },
+        ],
       },
       {
         element: <RequireRole roles={['employer']} />,

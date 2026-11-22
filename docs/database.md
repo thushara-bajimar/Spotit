@@ -6,6 +6,7 @@ SQLite, accessed with `better-sqlite3`. The schema lives in `server/src/db/migra
 |---|---|
 | `001_initial_schema.sql` | All tables, indexes and integrity triggers |
 | `002_seed_job_categories.sql` | The 10 bilingual job categories (reference data) |
+| `003_application_rules.sql` | Triggers that refuse applications to unavailable jobs and invalid application status changes, plus a listing index |
 
 Applied migrations are recorded in `schema_migrations`. Each migration runs in a transaction, so a
 failing migration changes nothing. Never edit a migration that has already been shared. Add a new
@@ -158,6 +159,8 @@ The audit log. Columns: `admin_id` (must be an admin), `action` (e.g. `job.rejec
 | `trg_jobs_employer_role` | Only employers own jobs |
 | `trg_applications_worker_role` | Only workers apply |
 | `trg_reviews_require_completed` | No reviews before the assignment is completed |
+| `trg_applications_job_accepting` / `trg_applications_reapply_job_accepting` | An application, or a re-application after withdrawing, needs an approved, open job with a free place |
+| `trg_applications_status_transition` | Allowed changes: `pending` to `accepted`, `rejected` or `withdrawn`; and `withdrawn` back to `pending`. All others are refused. |
 | `trg_admin_actions_admin_role` | Only admins appear in the audit log |
 | `trg_admin_actions_no_update` / `_no_delete` | The audit log cannot be changed |
 

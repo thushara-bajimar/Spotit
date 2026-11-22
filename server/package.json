@@ -9,7 +9,8 @@
     "start": "node src/server.js",
     "db:migrate": "node scripts/migrate.js",
     "test": "vitest run",
-    "create-admin": "node scripts/createAdmin.js"
+    "create-admin": "node scripts/createAdmin.js",
+    "db:seed": "node scripts/seedDev.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

@@ -49,6 +49,30 @@ export function listOf(getOptions, { max = 10 } = {}) {
   };
 }
 
+/** Whole number (accepts numeric strings, as query parameters always are). */
+export function integer({ min = 0, max = Number.MAX_SAFE_INTEGER, required = false } = {}) {
+  return (raw) => {
+    if (isMissing(raw)) return required ? { error: 'required' } : { value: null };
+    const value = typeof raw === 'number' ? raw : /^-?\d+$/.test(String(raw).trim()) ? Number(raw) : NaN;
+    if (!Number.isSafeInteger(value)) return { error: 'invalid' };
+    if (value < min) return { error: 'too_small' };
+    if (value > max) return { error: 'too_large' };
+    return { value };
+  };
+}
+
+/** Calendar date 'YYYY-MM-DD' that actually exists (rejects 2026-02-30). */
+export function isoDate({ required = false } = {}) {
+  return (raw) => {
+    if (isMissing(raw)) return required ? { error: 'required' } : { value: null };
+    if (typeof raw !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return { error: 'invalid_date' };
+    const [y, m, d] = raw.split('-').map(Number);
+    const date = new Date(Date.UTC(y, m - 1, d));
+    const valid = date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+    return valid ? { value: raw } : { error: 'invalid_date' };
+  };
+}
+
 /**
  * Indian mobile number. Accepts common formats (spaces, dashes, +91, 0
  * prefix) and normalises to 10 digits starting with 6–9.
@@ -113,6 +137,28 @@ export function runSchema(schema, input, refine) {
   }
 
   return { values, errors };
+}
+
+/**
+ * Express middleware for query strings. Express 5 makes req.query read-only,
+ * so clean values are placed on req.validQuery.
+ */
+export function validateQuery(schema) {
+  return (req, _res, next) => {
+    const { values, errors } = runSchema(schema, req.query);
+    if (errors.length > 0) {
+      return next(new HttpError(400, 'VALIDATION_ERROR', 'Some query parameters are invalid.', errors));
+    }
+    req.validQuery = values;
+    return next();
+  };
+}
+
+/** Parses a positive integer route parameter, or throws 404 (ids are never guessable hints). */
+export function idParam(raw, notFoundCode = 'NOT_FOUND') {
+  const id = /^\d{1,15}$/.test(String(raw)) ? Number(raw) : NaN;
+  if (!Number.isSafeInteger(id) || id < 1) throw new HttpError(404, notFoundCode, 'Not found.');
+  return id;
 }
 
 /** Express middleware: validates req.body and replaces it with clean values. */

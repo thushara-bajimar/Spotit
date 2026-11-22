@@ -14,7 +14,7 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 |---|---|---|
 | 1 | Foundation: structure, database schema, design system, layouts, routing, i18n, docs | **Done** |
 | 2 | Authentication (register, login, logout, roles, sessions) | **Done** |
-| 3 | Worker module (profile, job browsing, search, filters, applications) | Planned |
+| 3 | Worker module (job browsing, search, filters, job details, applications) | **Done** (profile editing still to come) |
 | 4 | Employer module (onboarding, approval, job creation & management) | Planned |
 | 5 | Applications & assignments (accept/reject, capacity, assignments) | Planned |
 | 6 | Admin (dashboard, approvals, users, moderation, audit log) | Planned |
@@ -28,9 +28,12 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 - Role-protected pages and API routes.
 - The language preference is saved to the user's account.
 - The landing page, with categories loaded from the database.
+- Worker marketplace: search, filters, sorting and job details.
+- Applying for jobs, with duplicate and unavailable-job protection.
+- "My applications", including withdrawing an application.
 
-**What does not work yet:** job search and the dashboard features. Those sections are marked *Planned ·
-Phase N*.
+**What does not work yet:** the employer and admin features (for example, posting jobs and approving
+employers). Those sections are marked *Planned · Phase N*.
 
 ## Tech stack
 
@@ -73,6 +76,22 @@ Admins cannot register through the website. To create the first one:
 
 The script refuses to run when `NODE_ENV=production`, or when an admin already exists.
 
+### Sample jobs for development
+
+Employers cannot post jobs until Phase 4. To try the worker marketplace before then, run:
+
+```bash
+npm run db:seed
+```
+
+This adds 4 approved sample employers and 13 sample jobs, all titled `[Sample] …`. Two of the jobs are
+deliberately hidden from the marketplace: one is pending approval and one is already filled. It also
+adds a demo worker, who logs in with phone `7000000010` and password `sample1234`.
+
+- It only runs outside production.
+- It does nothing if the sample data already exists.
+- To remove the sample data, delete `server/data/` and restart the server.
+
 Then open **http://localhost:5173**.
 
 - The API runs on http://localhost:4000 (health check: http://localhost:4000/api/health).
@@ -98,6 +117,7 @@ All commands run from the project root.
 | `npm run start` | Starts the API without file watching |
 | `npm run db:migrate` | Applies pending database migrations |
 | `npm run create-admin` | Creates the first admin from `server/.env` (development only) |
+| `npm run db:seed` | Adds sample employers, jobs and a demo worker (development only) |
 
 To start over with an empty database, stop the server and delete the `server/data/` folder.
 

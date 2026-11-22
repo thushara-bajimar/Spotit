@@ -23,7 +23,8 @@
     "optional": "(optional)",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
-    "select": "Select…"
+    "select": "Select…",
+    "cancel": "Cancel"
   },
   "language": {
     "en": "English",
@@ -230,7 +231,12 @@
     "AUTH_REQUIRED": "Please log in to continue.",
     "FORBIDDEN": "You do not have access to this page.",
     "PHONE_TAKEN": "An account with this number already exists. Try logging in.",
-    "INVALID_ORIGIN": "Request blocked for security reasons. Please reload the page."
+    "INVALID_ORIGIN": "Request blocked for security reasons. Please reload the page.",
+    "JOB_NOT_FOUND": "This job could not be found.",
+    "JOB_UNAVAILABLE": "This job is not accepting applications.",
+    "ALREADY_APPLIED": "You have already applied for this job.",
+    "APPLICATION_NOT_FOUND": "Application not found.",
+    "CANNOT_WITHDRAW": "Only pending applications can be withdrawn."
   },
   "notFound": {
     "title": "Page not found",
@@ -256,6 +262,145 @@
     "invalid_phone": "Enter a valid 10-digit mobile number.",
     "phone_taken": "An account with this number already exists. Try logging in.",
     "password_too_short": "Password must be at least 8 characters.",
-    "password_too_long": "Password is too long."
+    "password_too_long": "Password is too long.",
+    "too_small": "This value is too small.",
+    "too_large": "This value is too large.",
+    "invalid_date": "Enter a valid date."
+  },
+  "jobs": {
+    "title": "Find work",
+    "subtitle": "Approved jobs with wages shown upfront.",
+    "searchLabel": "Search jobs",
+    "searchPlaceholder": "Job, skill or place",
+    "search": "Search",
+    "resultCount_one": "{{count}} job found",
+    "resultCount_other": "{{count}} jobs found",
+    "resultsLabel": "Job results",
+    "empty": "No jobs match your search.",
+    "emptyHint": "Try removing some filters or searching for something else.",
+    "loadError": "We couldn't load jobs.",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {{page}} of {{total}}",
+    "pagination": "Pages",
+    "vacancies_one": "{{count}} place left",
+    "vacancies_other": "{{count}} places left",
+    "workersNeeded_one": "{{count}} worker needed",
+    "workersNeeded_other": "{{count}} workers needed",
+    "viewDetails": "View details",
+    "facts": {
+      "location": "Location",
+      "date": "Date",
+      "timings": "Working hours",
+      "duration": "Duration",
+      "places": "Places left"
+    },
+    "sort": {
+      "label": "Sort by",
+      "newest": "Newest first",
+      "soonest": "Starting soonest",
+      "wage_high": "Highest wage",
+      "wage_low": "Lowest wage"
+    },
+    "filters": {
+      "title": "Filters",
+      "show": "Filters",
+      "hide": "Hide filters",
+      "clear": "Clear filters",
+      "category": "Type of work",
+      "allCategories": "All types of work",
+      "district": "District",
+      "allDistricts": "All districts",
+      "wageBasis": "Paid",
+      "anyWageBasis": "Any way",
+      "basis": {
+        "per_hour": "Per hour",
+        "per_day": "Per day",
+        "per_week": "Per week",
+        "per_task": "Per task"
+      },
+      "minWage": "Minimum wage (₹)",
+      "duration": "Duration",
+      "anyDuration": "Any duration",
+      "date": "Working on",
+      "dateHint": "Show jobs running on this date."
+    },
+    "unavailable": {
+      "not_approved": "This job is not published.",
+      "employer_unavailable": "This employer is not active at the moment.",
+      "filled": "All places for this job have been filled.",
+      "closed": "The employer has closed this job.",
+      "cancelled": "This job was cancelled.",
+      "expired": "The dates for this job have passed.",
+      "in_progress": "This work has already started.",
+      "completed": "This work is completed.",
+      "draft": "This job is not published yet.",
+      "no_vacancies": "There are no places left."
+    }
+  },
+  "jobDetails": {
+    "back": "Back to jobs",
+    "about": "About the work",
+    "requirements": "Requirements",
+    "employer": "Employer",
+    "verifiedEmployer": "Verified by {{appName}}",
+    "memberSince": "On {{appName}} since {{date}}",
+    "contactTitle": "Contact details",
+    "contactPhone": "Phone",
+    "contactAddress": "Address",
+    "contactHidden": "The employer's phone number and exact address are shared once your application is accepted.",
+    "notFound": "This job could not be found.",
+    "loadError": "We couldn't load this job."
+  },
+  "applications": {
+    "title": "My applications",
+    "subtitle": "Track the jobs you have applied for.",
+    "all": "All",
+    "filterLabel": "Filter by status",
+    "empty": "You haven't applied for any jobs yet.",
+    "emptyFiltered": "No applications with this status.",
+    "browse": "Browse jobs",
+    "loadError": "We couldn't load your applications.",
+    "applyTitle": "Apply for this job",
+    "applyAgain": "Apply again",
+    "apply": "Send application",
+    "applying": "Sending…",
+    "messageLabel": "Message to the employer",
+    "messageHint": "For example, when you can start or your experience.",
+    "applied": "Application sent! The employer will review it.",
+    "withdrawn": "Your application was withdrawn.",
+    "yourApplication": "Your application",
+    "appliedOn": "Applied on {{date}}",
+    "withdraw": "Withdraw application",
+    "withdrawConfirm": "Withdraw your application for this job?",
+    "withdrawYes": "Yes, withdraw",
+    "unavailableTitle": "Not accepting applications",
+    "statusHelp": {
+      "pending": "Waiting for the employer to respond.",
+      "accepted": "You have been selected! Contact details are shown below.",
+      "rejected": "The employer chose other workers this time.",
+      "withdrawn": "You withdrew this application."
+    }
+  },
+  "applicationStatus": {
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "withdrawn": "Withdrawn"
+  },
+  "workerHome": {
+    "title": "Hi, {{name}}",
+    "subtitle": "Find work near you today.",
+    "browseAll": "Browse all jobs",
+    "jobsInDistrict": "Jobs in {{district}}",
+    "summaryTitle": "Your applications",
+    "viewAll": "View all"
+  },
+  "profile": {
+    "title": "My profile",
+    "location": "Location",
+    "skills": "Work I can do",
+    "noSkills": "No types of work selected yet.",
+    "editingLater": "Profile editing will be available in a later update."
   }
 }
