@@ -22,12 +22,36 @@ function readPort(value, fallback) {
   return port;
 }
 
+function readList(value, fallback) {
+  if (!value) return fallback;
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 const nodeEnv = process.env.NODE_ENV || 'development';
+const isProduction = nodeEnv === 'production';
+const isTest = nodeEnv === 'test';
 
 export const config = Object.freeze({
   nodeEnv,
-  isProduction: nodeEnv === 'production',
-  isTest: nodeEnv === 'test',
+  isProduction,
+  isTest,
   port: readPort(process.env.PORT, 4000),
   databasePath: path.resolve(SERVER_ROOT, process.env.DATABASE_PATH || 'data/spotit.db'),
+
+  // Browser origins allowed to make state-changing requests (CSRF protection).
+  // Requests whose Origin matches the request's own Host are always allowed.
+  allowedOrigins: readList(process.env.CLIENT_ORIGINS, ['http://localhost:5173', 'http://localhost:4173']),
+
+  session: {
+    cookieName: 'spotit_session',
+    ttlDays: 30,
+    // Secure cookies need HTTPS, so they are only forced on in production.
+    secureCookie: isProduction,
+  },
+
+  // bcrypt cost factor; tests use the minimum so they run quickly.
+  bcryptRounds: isTest ? 4 : 12,
 });

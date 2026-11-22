@@ -89,10 +89,31 @@ same-origin model.
 | Security headers | In place (`helmet`) |
 | Safe error responses | In place |
 | Secrets in env files, never committed | In place (`.env` is git-ignored; `.env.example` templates are provided) |
-| Password hashing (bcrypt), sessions, rate limiting on auth routes, CSRF protection (SameSite cookie + Origin check), server-side role checks | Phase 2 |
+| Password hashing | In place: bcrypt (`bcryptjs`, cost 12). Hashes are never returned by the API. |
+| Sessions | In place: random 256-bit token in an `HttpOnly`, `SameSite=Lax` cookie (also `Secure` in production). The database stores only the SHA-256 hash. The session is rotated on login and deleted on logout. Sessions expire after 30 days. |
+| Login enumeration | A wrong phone and a wrong password return the same error and take the same time |
+| Rate limiting | Login: 10 failed attempts per 15 minutes per IP. Registration: 20 per hour per IP. |
+| CSRF | `SameSite=Lax` cookie plus an Origin check on every state-changing request |
+| Role checks | `requireRole(...)` on every role router (`/api/worker`, `/api/employer`, `/api/admin`) |
+| Suspended users | Login is refused, and existing sessions are deleted on their next request |
+| Input validation | `validateBody` middleware. Unknown fields are dropped, so a client cannot set `role`, `account_status` or `verification_status`. |
+| Admin creation | Only through the `npm run create-admin` CLI. It refuses to run in production and if an admin already exists. |
 
-**Important:** frontend route guards (Phase 2) are only a convenience. Every permission is enforced by
-the API.
+**Important:** the frontend route guards (`RequireRole`, `GuestOnly` in `client/src/routes/guards.jsx`)
+are only a convenience. Every permission is enforced by the API.
+
+## Authentication flow (Phase 2)
+
+1. On start-up, `AuthProvider` (`client/src/context/AuthContext.jsx`) calls `GET /api/auth/me`. JavaScript
+   cannot read the session cookie, so this is how the app learns who is logged in.
+2. Login and registration responses set the cookie and return the user. The app then applies the
+   account's saved language and redirects to the role's home: `/worker`, `/employer` or `/admin`. A
+   `?next=` parameter is followed only when it points inside the user's own area.
+3. When a signed-in user switches language, the choice is saved to the account with
+   `PATCH /api/auth/me/language`.
+4. Logout deletes the server session. The guards then send the user to the landing page.
+5. On the server, `createSessionLoader` runs before every API route and sets `req.user = { id, role }`
+   when the cookie is valid.
 
 ## Temporary content
 

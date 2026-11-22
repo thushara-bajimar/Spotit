@@ -8,6 +8,8 @@ import { Badge } from '../components/ui/Badge.jsx';
 import { SideNav } from '../components/navigation/SideNav.jsx';
 import { BottomNav } from '../components/navigation/BottomNav.jsx';
 import { MobileDrawer } from '../components/navigation/MobileDrawer.jsx';
+import { UserMenu } from '../components/common/UserMenu.jsx';
+import { AccountStatusBanner } from '../components/common/AccountStatusBanner.jsx';
 import { cx } from '../utils/cx.js';
 
 /**
@@ -16,8 +18,8 @@ import { cx } from '../utils/cx.js';
  * mobileNav = 'bottom' → bottom tab bar on phones, sidebar from `md` up.
  * mobileNav = 'drawer' → menu button + slide-in drawer, sidebar from `lg` up.
  *
- * NOTE (Phase 1): these routes are NOT protected yet. Real sign-in and
- * server-enforced role checks arrive in Phase 2; the banner says so.
+ * Access is guarded by <RequireRole> in the router (UI) and by requireRole
+ * on every API route (the real security boundary).
  */
 export function DashboardLayout({ role, homePath, navItems, mobileNav = 'bottom', notificationsPath }) {
   const { t } = useTranslation();
@@ -57,11 +59,10 @@ export function DashboardLayout({ role, homePath, navItems, mobileNav = 'bottom'
               </Link>
             )}
             <LanguageToggle />
+            <UserMenu />
           </div>
         </div>
-        <p className="border-t border-amber-300 bg-amber-100 px-4 py-2 text-center text-xs text-ink sm:text-sm">
-          {t('dashboard.previewBanner')}
-        </p>
+        <AccountStatusBanner />
       </header>
 
       <div className="flex flex-1">

@@ -6,6 +6,9 @@ import { AdminLayout, EmployerLayout, WorkerLayout } from '../layouts/RoleLayout
 import { LandingPage } from '../pages/landing/LandingPage.jsx';
 import { LoginPage } from '../pages/auth/LoginPage.jsx';
 import { RegisterPage } from '../pages/auth/RegisterPage.jsx';
+import { RegisterWorkerPage } from '../pages/auth/RegisterWorkerPage.jsx';
+import { RegisterEmployerPage } from '../pages/auth/RegisterEmployerPage.jsx';
+import { GuestOnly, RequireRole } from './guards.jsx';
 import { PlaceholderPage } from '../pages/dashboard/PlaceholderPage.jsx';
 import { NotFoundPage } from '../pages/NotFoundPage.jsx';
 import { adminNav, employerNav, employerNotifications, workerNav } from './navigation.js';
@@ -20,14 +23,14 @@ function placeholderRoutes(items) {
 
 /*
  * Route map
- *   /                       public landing page
- *   /login, /register       auth screens (layout only in Phase 1)
- *   /worker/*               worker (employee) area
- *   /employer/*             employer area
- *   /admin/*                admin area
+ *   /                                 public landing page
+ *   /login, /register                 guests only (signed-in users go to their home)
+ *   /register/worker|employer         separate sign-up flows
+ *   /worker/*                         workers only
+ *   /employer/*                       employers only
+ *   /admin/*                          admins only
  *
- * PHASE 1: role areas are NOT protected. Phase 2 adds a <RequireRole> guard
- * here, and — more importantly — the API enforces every permission itself.
+ * The guards only shape the UI. The API enforces every permission itself.
  */
 export const router = createBrowserRouter([
   {
@@ -41,26 +44,36 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        element: <AuthLayout />,
+        element: <GuestOnly />,
         children: [
-          { path: 'login', element: <LoginPage /> },
-          { path: 'register', element: <RegisterPage /> },
+          {
+            element: <AuthLayout />,
+            children: [
+              { path: 'login', element: <LoginPage /> },
+              { path: 'register', element: <RegisterPage /> },
+              { path: 'register/worker', element: <RegisterWorkerPage /> },
+              { path: 'register/employer', element: <RegisterEmployerPage /> },
+            ],
+          },
         ],
       },
       {
-        path: 'worker',
-        element: <WorkerLayout />,
-        children: placeholderRoutes(workerNav),
+        element: <RequireRole roles={['worker']} />,
+        children: [{ path: 'worker', element: <WorkerLayout />, children: placeholderRoutes(workerNav) }],
       },
       {
-        path: 'employer',
-        element: <EmployerLayout />,
-        children: placeholderRoutes([...employerNav, employerNotifications]),
+        element: <RequireRole roles={['employer']} />,
+        children: [
+          {
+            path: 'employer',
+            element: <EmployerLayout />,
+            children: placeholderRoutes([...employerNav, employerNotifications]),
+          },
+        ],
       },
       {
-        path: 'admin',
-        element: <AdminLayout />,
-        children: placeholderRoutes(adminNav),
+        element: <RequireRole roles={['admin']} />,
+        children: [{ path: 'admin', element: <AdminLayout />, children: placeholderRoutes(adminNav) }],
       },
     ],
   },

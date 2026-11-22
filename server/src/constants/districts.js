@@ -1,0 +1,37 @@
+// Karnataka districts — the single list used for location fields.
+// The database stores the `id` (slug); the client shows nameEn / nameKn.
+export const DISTRICTS = [
+  { id: 'bagalkote', nameEn: 'Bagalkote', nameKn: 'ಬಾಗಲಕೋಟೆ' },
+  { id: 'ballari', nameEn: 'Ballari', nameKn: 'ಬಳ್ಳಾರಿ' },
+  { id: 'belagavi', nameEn: 'Belagavi', nameKn: 'ಬೆಳಗಾವಿ' },
+  { id: 'bengaluru_rural', nameEn: 'Bengaluru Rural', nameKn: 'ಬೆಂಗಳೂರು ಗ್ರಾಮಾಂತರ' },
+  { id: 'bengaluru_urban', nameEn: 'Bengaluru Urban', nameKn: 'ಬೆಂಗಳೂರು ನಗರ' },
+  { id: 'bidar', nameEn: 'Bidar', nameKn: 'ಬೀದರ್' },
+  { id: 'chamarajanagar', nameEn: 'Chamarajanagar', nameKn: 'ಚಾಮರಾಜನಗರ' },
+  { id: 'chikkaballapur', nameEn: 'Chikkaballapur', nameKn: 'ಚಿಕ್ಕಬಳ್ಳಾಪುರ' },
+  { id: 'chikkamagaluru', nameEn: 'Chikkamagaluru', nameKn: 'ಚಿಕ್ಕಮಗಳೂರು' },
+  { id: 'chitradurga', nameEn: 'Chitradurga', nameKn: 'ಚಿತ್ರದುರ್ಗ' },
+  { id: 'dakshina_kannada', nameEn: 'Dakshina Kannada', nameKn: 'ದಕ್ಷಿಣ ಕನ್ನಡ' },
+  { id: 'davanagere', nameEn: 'Davanagere', nameKn: 'ದಾವಣಗೆರೆ' },
+  { id: 'dharwad', nameEn: 'Dharwad', nameKn: 'ಧಾರವಾಡ' },
+  { id: 'gadag', nameEn: 'Gadag', nameKn: 'ಗದಗ' },
+  { id: 'hassan', nameEn: 'Hassan', nameKn: 'ಹಾಸನ' },
+  { id: 'haveri', nameEn: 'Haveri', nameKn: 'ಹಾವೇರಿ' },
+  { id: 'kalaburagi', nameEn: 'Kalaburagi', nameKn: 'ಕಲಬುರಗಿ' },
+  { id: 'kodagu', nameEn: 'Kodagu', nameKn: 'ಕೊಡಗು' },
+  { id: 'kolar', nameEn: 'Kolar', nameKn: 'ಕೋಲಾರ' },
+  { id: 'koppal', nameEn: 'Koppal', nameKn: 'ಕೊಪ್ಪಳ' },
+  { id: 'mandya', nameEn: 'Mandya', nameKn: 'ಮಂಡ್ಯ' },
+  { id: 'mysuru', nameEn: 'Mysuru', nameKn: 'ಮೈಸೂರು' },
+  { id: 'raichur', nameEn: 'Raichur', nameKn: 'ರಾಯಚೂರು' },
+  { id: 'ramanagara', nameEn: 'Bengaluru South (Ramanagara)', nameKn: 'ಬೆಂಗಳೂರು ದಕ್ಷಿಣ (ರಾಮನಗರ)' },
+  { id: 'shivamogga', nameEn: 'Shivamogga', nameKn: 'ಶಿವಮೊಗ್ಗ' },
+  { id: 'tumakuru', nameEn: 'Tumakuru', nameKn: 'ತುಮಕೂರು' },
+  { id: 'udupi', nameEn: 'Udupi', nameKn: 'ಉಡುಪಿ' },
+  { id: 'uttara_kannada', nameEn: 'Uttara Kannada', nameKn: 'ಉತ್ತರ ಕನ್ನಡ' },
+  { id: 'vijayanagara', nameEn: 'Vijayanagara', nameKn: 'ವಿಜಯನಗರ' },
+  { id: 'vijayapura', nameEn: 'Vijayapura', nameKn: 'ವಿಜಯಪುರ' },
+  { id: 'yadgir', nameEn: 'Yadgir', nameKn: 'ಯಾದಗಿರಿ' },
+];
+
+export const DISTRICT_IDS = DISTRICTS.map((district) => district.id);

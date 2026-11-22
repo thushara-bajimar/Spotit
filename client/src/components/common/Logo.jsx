@@ -15,7 +15,7 @@ export function Logo({ to = '/', tone = 'dark', className }) {
     <Link
       to={to}
       aria-label={t('brand.home')}
-      className={cx('inline-flex items-center gap-2 rounded-lg font-display text-2xl font-bold', className)}
+      className={cx('inline-flex items-center gap-2 rounded-lg font-display text-xl font-bold sm:text-2xl', className)}
     >
       <span
         aria-hidden="true"

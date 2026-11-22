@@ -8,11 +8,14 @@
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "db:migrate": "node scripts/migrate.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "create-admin": "node scripts/createAdmin.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "better-sqlite3": "^13.2.0",
     "express": "^5.3.0",
+    "express-rate-limit": "^8.7.5",
     "helmet": "^8.3.0"
   },
   "devDependencies": {

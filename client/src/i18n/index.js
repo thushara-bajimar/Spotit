@@ -55,7 +55,7 @@ applyDocumentLanguage(i18n.language);
 i18n.on('languageChanged', (language) => {
   applyDocumentLanguage(language);
   storeLanguage(language);
-  // Phase 2: also save the preference to the signed-in user's account.
+  // Signed-in users: AuthProvider also saves the choice to their account.
 });
 
 export default i18n;

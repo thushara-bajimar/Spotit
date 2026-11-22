@@ -13,7 +13,7 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Foundation: structure, database schema, design system, layouts, routing, i18n, docs | **Done** |
-| 2 | Authentication (register, login, logout, roles, sessions) | Planned |
+| 2 | Authentication (register, login, logout, roles, sessions) | **Done** |
 | 3 | Worker module (profile, job browsing, search, filters, applications) | Planned |
 | 4 | Employer module (onboarding, approval, job creation & management) | Planned |
 | 5 | Applications & assignments (accept/reject, capacity, assignments) | Planned |
@@ -22,10 +22,15 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 | 8 | Notifications & full translation review | Planned |
 | 9 | Testing & refinement | Planned |
 
-**What works in Phase 1:** the landing page (job categories load from the real database), language switching,
-all layouts and routes, the health-check API and the full database schema.
-**What does not work yet:** login, registration, job search and every dashboard feature. These screens are
-clearly marked *Preview* or *Planned · Phase N*. The dashboard routes are **not protected** yet.
+**What works so far:**
+- Worker registration and employer registration. New employers start as *pending approval*.
+- Login and logout with secure sessions.
+- Role-protected pages and API routes.
+- The language preference is saved to the user's account.
+- The landing page, with categories loaded from the database.
+
+**What does not work yet:** job search and the dashboard features. Those sections are marked *Planned ·
+Phase N*.
 
 ## Tech stack
 
@@ -56,6 +61,18 @@ cp server/.env.example server/.env
 npm run dev
 ```
 
+### Creating the first admin (development only)
+
+Admins cannot register through the website. To create the first one:
+
+1. In `server/.env`, set `ADMIN_NAME`, `ADMIN_PHONE` (a 10-digit mobile number) and `ADMIN_PASSWORD`
+   (8 or more characters).
+2. Run `npm run create-admin` from the project root.
+3. Log in at http://localhost:5173/login with that phone and password.
+4. Remove `ADMIN_PASSWORD` from `server/.env`.
+
+The script refuses to run when `NODE_ENV=production`, or when an admin already exists.
+
 Then open **http://localhost:5173**.
 
 - The API runs on http://localhost:4000 (health check: http://localhost:4000/api/health).
@@ -80,6 +97,7 @@ All commands run from the project root.
 | `npm run build` | Builds the web app into `client/dist/` |
 | `npm run start` | Starts the API without file watching |
 | `npm run db:migrate` | Applies pending database migrations |
+| `npm run create-admin` | Creates the first admin from `server/.env` (development only) |
 
 To start over with an empty database, stop the server and delete the `server/data/` folder.
 

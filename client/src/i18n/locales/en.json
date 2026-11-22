@@ -16,7 +16,14 @@
     "closeMenu": "Close menu",
     "mainNavigation": "Main navigation",
     "notifications": "Notifications",
-    "skipToContent": "Skip to main content"
+    "skipToContent": "Skip to main content",
+    "logout": "Log out",
+    "myDashboard": "My dashboard",
+    "greeting": "Hi, {{name}}",
+    "optional": "(optional)",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "select": "Select…"
   },
   "language": {
     "en": "English",
@@ -143,13 +150,10 @@
     "login": {
       "title": "Welcome back",
       "subtitle": "Log in with your mobile number.",
-      "phone": "Mobile number",
-      "phoneHint": "10-digit number, without +91",
-      "password": "Password",
       "submit": "Log in",
       "noAccount": "New to {{appName}}?",
       "registerLink": "Create an account",
-      "notice": "Logging in will be available soon. This screen is a preview."
+      "submitting": "Logging in…"
     },
     "register": {
       "title": "Create your account",
@@ -161,15 +165,44 @@
       "employerText": "I need help for my home, shop or organisation.",
       "continue": "Continue",
       "haveAccount": "Already have an account?",
-      "loginLink": "Log in",
-      "notice": "Registration will be available soon. This screen is a preview."
+      "loginLink": "Log in"
+    },
+    "fields": {
+      "fullName": "Full name",
+      "phone": "Mobile number",
+      "phoneHint": "10-digit number, without +91",
+      "password": "Password",
+      "newPasswordHint": "At least 8 characters",
+      "district": "District",
+      "locality": "Town / locality",
+      "localityHint": "e.g. Kankanady, Mangaluru",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "changeType": "Change account type"
+    },
+    "registerWorker": {
+      "title": "Create your worker account",
+      "subtitle": "We only ask for what is needed to help you find work.",
+      "skillsLegend": "What work can you do?",
+      "skillsHint": "Choose all that apply. You can change this later.",
+      "privacyNote": "Your phone number is not shown publicly."
+    },
+    "registerEmployer": {
+      "title": "Create your employer account",
+      "subtitle": "Tell us who is hiring and where.",
+      "reviewNote": "Our team reviews every employer. You can post jobs once your account is approved.",
+      "employerType": "Type of employer",
+      "businessName": "Business or organisation name",
+      "address": "Address",
+      "addressHint": "Helps workers find the place."
     }
   },
   "dashboard": {
-    "previewBanner": "Layout preview — sign-in and access control are added in the next phase. Nothing here is live yet.",
     "roleArea": "{{role}} area",
     "placeholderBody": "This section is planned and will be built in a later phase.",
-    "placeholderPhase": "Planned · Phase {{phase}}"
+    "placeholderPhase": "Planned · Phase {{phase}}",
+    "employerPending": "Your employer account is waiting for admin approval. You can post jobs once it is approved.",
+    "employerRejected": "Your employer account was not approved. Reason: {{reason}}"
   },
   "wage": {
     "basis": {
@@ -189,11 +222,40 @@
     "generic": "Something went wrong. Please try again.",
     "NETWORK_ERROR": "Could not reach the server. Check your connection and try again.",
     "NOT_FOUND": "Not found.",
-    "INTERNAL_ERROR": "Something went wrong on our side."
+    "INTERNAL_ERROR": "Something went wrong on our side.",
+    "VALIDATION_ERROR": "Please correct the highlighted fields.",
+    "INVALID_CREDENTIALS": "Mobile number or password is incorrect.",
+    "ACCOUNT_SUSPENDED": "This account has been suspended.",
+    "TOO_MANY_REQUESTS": "Too many attempts. Please wait a few minutes and try again.",
+    "AUTH_REQUIRED": "Please log in to continue.",
+    "FORBIDDEN": "You do not have access to this page.",
+    "PHONE_TAKEN": "An account with this number already exists. Try logging in.",
+    "INVALID_ORIGIN": "Request blocked for security reasons. Please reload the page."
   },
   "notFound": {
     "title": "Page not found",
     "text": "The page you are looking for does not exist or has moved.",
     "action": "Go to home"
+  },
+  "employerTypes": {
+    "individual": "Individual",
+    "household": "Household",
+    "small_business": "Small business",
+    "hotel_restaurant": "Hotel / restaurant",
+    "shop": "Shop",
+    "hospital_institution": "Hospital / institution",
+    "other": "Other"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "invalid": "This value is not valid.",
+    "too_short": "This is too short.",
+    "too_long": "This is too long.",
+    "too_many": "Too many selected.",
+    "invalid_choice": "Please choose a valid option.",
+    "invalid_phone": "Enter a valid 10-digit mobile number.",
+    "phone_taken": "An account with this number already exists. Try logging in.",
+    "password_too_short": "Password must be at least 8 characters.",
+    "password_too_long": "Password is too long."
   }
 }

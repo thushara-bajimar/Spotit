@@ -16,12 +16,15 @@ import '@fontsource/baloo-tamma-2/700.css';
 import './styles/index.css';
 import './i18n/index.js';
 import { router } from './routes/router.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
 import { APP_NAME } from './config/brand.js';
 
 document.title = APP_NAME;
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>,
 );
