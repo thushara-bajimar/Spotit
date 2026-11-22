@@ -18,6 +18,7 @@ import { fetchEmployerProfile, updateEmployerProfileRequest } from '../../servic
 import { fetchDistricts } from '../../services/referenceService.js';
 import { checks, validate } from '../../utils/validation.js';
 import { formatTimestamp, localName } from '../../utils/format.js';
+import { ProfileTrust } from '../../components/trust/ProfileTrust.jsx';
 
 const EMPLOYER_TYPES = ['individual', 'household', 'small_business', 'hotel_restaurant', 'shop', 'hospital_institution', 'other'];
 const WITHOUT_BUSINESS = ['individual', 'household'];
@@ -194,6 +195,7 @@ export function EmployerProfilePage() {
           </dl>
         )}
       </Card>
+      <ProfileTrust />
     </div>
   );
 }

@@ -10,6 +10,8 @@ import { BottomNav } from '../components/navigation/BottomNav.jsx';
 import { MobileDrawer } from '../components/navigation/MobileDrawer.jsx';
 import { UserMenu } from '../components/common/UserMenu.jsx';
 import { AccountStatusBanner } from '../components/common/AccountStatusBanner.jsx';
+import { UnreadBadge } from '../components/common/UnreadBadge.jsx';
+import { NotificationsProvider } from '../context/NotificationsContext.jsx';
 import { cx } from '../utils/cx.js';
 
 /**
@@ -28,6 +30,7 @@ export function DashboardLayout({ role, homePath, navItems, mobileNav = 'bottom'
   const usesDrawer = mobileNav === 'drawer';
 
   return (
+    <NotificationsProvider>
     <div className="flex min-h-dvh flex-col bg-cream-50">
       <header className="sticky top-0 z-30 border-b border-line bg-white">
         <div className="flex h-16 items-center gap-2 px-4 sm:gap-3 lg:px-6">
@@ -53,9 +56,10 @@ export function DashboardLayout({ role, homePath, navItems, mobileNav = 'bottom'
               <Link
                 to={notificationsPath}
                 aria-label={t('common.notifications')}
-                className="grid size-11 place-items-center rounded-xl text-forest-800 hover:bg-forest-50"
+                className="relative grid size-11 place-items-center rounded-xl text-forest-800 hover:bg-forest-50"
               >
                 <Bell aria-hidden="true" className="size-6" />
+                <UnreadBadge className="absolute top-1 right-1" />
               </Link>
             )}
             <LanguageToggle />
@@ -94,5 +98,6 @@ export function DashboardLayout({ role, homePath, navItems, mobileNav = 'bottom'
         <BottomNav items={navItems} />
       )}
     </div>
+    </NotificationsProvider>
   );
 }

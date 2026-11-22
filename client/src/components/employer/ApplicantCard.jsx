@@ -9,6 +9,7 @@ import { FormError } from '../forms/FormError.jsx';
 import { acceptApplicationRequest, rejectApplicationRequest } from '../../services/employerService.js';
 import { formatTimestamp, localName } from '../../utils/format.js';
 import { cx } from '../../utils/cx.js';
+import { RatingSummary } from '../ui/Rating.jsx';
 
 /** Accept / reject with an inline confirmation step. */
 function DecisionControls({ applicant, onDecided }) {
@@ -94,7 +95,10 @@ export function ApplicantCard({ applicant, categories, showJob = false, onDecide
             <UserRound aria-hidden="true" className="size-5" />
           </span>
           <div className="min-w-0">
-            <h3 className="font-sans text-base font-bold text-ink">{worker.name}</h3>
+            <h3 className="flex flex-wrap items-center gap-2 font-sans text-base font-bold text-ink">
+              {worker.name}
+              <RatingSummary rating={worker.rating} />
+            </h3>
             {(worker.locality || worker.district) && (
               <p className="flex items-center gap-1 text-sm text-muted">
                 <MapPin aria-hidden="true" className="size-3.5" />

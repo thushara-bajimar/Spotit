@@ -38,7 +38,7 @@ export const workerNav = section(WORKER_HOME, [
   { segment: '', labelKey: 'nav.worker.home', icon: House, phase: 3 },
   { segment: 'jobs', labelKey: 'nav.worker.jobs', icon: Search, phase: 3 },
   { segment: 'my-work', labelKey: 'nav.worker.myWork', icon: ClipboardCheck, phase: 5 },
-  { segment: 'notifications', labelKey: 'nav.worker.notifications', icon: Bell, phase: 8 },
+  { segment: 'notifications', labelKey: 'nav.worker.notifications', icon: Bell, badge: 'unread' },
   { segment: 'profile', labelKey: 'nav.worker.profile', icon: User, phase: 3 },
 ]);
 
@@ -53,7 +53,7 @@ export const employerNav = section(EMPLOYER_HOME, [
 
 // Employer notifications are reached from the bell in the top bar.
 export const employerNotifications = section(EMPLOYER_HOME, [
-  { segment: 'notifications', labelKey: 'nav.employer.notifications', icon: Bell, phase: 8 },
+  { segment: 'notifications', labelKey: 'nav.employer.notifications', icon: Bell, badge: 'unread' },
 ])[0];
 
 export const adminNav = section(ADMIN_HOME, [

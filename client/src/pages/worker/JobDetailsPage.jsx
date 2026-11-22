@@ -12,6 +12,8 @@ import { ApplyPanel } from '../../components/jobs/ApplyPanel.jsx';
 import { useApiData } from '../../hooks/useApiData.js';
 import { fetchJob } from '../../services/workerService.js';
 import { formatTimestamp, localName } from '../../utils/format.js';
+import { RatingSummary } from '../../components/ui/Rating.jsx';
+import { ReportForm } from '../../components/trust/ReportForm.jsx';
 
 function BackLink() {
   const { t } = useTranslation();
@@ -99,7 +101,10 @@ export function JobDetailsPage() {
 
           <Card className="p-5 sm:p-6">
             <h2 className="font-sans text-lg font-bold text-ink">{t('jobDetails.employer')}</h2>
-            <p className="mt-2 font-semibold text-ink">{job.employer.name}</p>
+            <p className="mt-2 flex flex-wrap items-center gap-2 font-semibold text-ink">
+              {job.employer.name}
+              <RatingSummary rating={job.employer.rating} />
+            </p>
             <p className="text-sm text-muted">{t(`employerTypes.${job.employer.type}`)}</p>
             {job.employer.verified && (
               <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-forest-700">
@@ -110,6 +115,10 @@ export function JobDetailsPage() {
             <p className="mt-1 text-sm text-muted">
               {t('jobDetails.memberSince', { date: formatTimestamp(job.employer.memberSince, language) })}
             </p>
+            <div className="mt-4 border-t border-line pt-3">
+              <ReportForm target={{ type: 'job', id: job.id }} label={t('reports.reportJob')}
+                categories={['misleading_job', 'spam', 'fake_account', 'other']} />
+            </div>
           </Card>
         </div>
 

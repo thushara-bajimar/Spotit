@@ -23,9 +23,8 @@ import { ApplicantsPage } from '../pages/employer/ApplicantsPage.jsx';
 import { EmployerProfilePage } from '../pages/employer/EmployerProfilePage.jsx';
 import { EmployerAssignmentsPage } from '../pages/employer/EmployerAssignmentsPage.jsx';
 import { EmployerAssignmentPage, WorkerAssignmentPage } from '../pages/assignments/AssignmentPages.jsx';
-import { PlaceholderPage } from '../pages/dashboard/PlaceholderPage.jsx';
 import { NotFoundPage } from '../pages/NotFoundPage.jsx';
-import { employerNotifications, workerNav } from './navigation.js';
+import { NotificationsPage } from '../pages/NotificationsPage.jsx';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage.jsx';
 import { AdminEmployerPage, EmployerApprovalsPage } from '../pages/admin/EmployerApprovalsPage.jsx';
 import { AdminJobPage, JobApprovalsPage } from '../pages/admin/JobApprovalsPage.jsx';
@@ -33,14 +32,6 @@ import { AdminUserPage, UsersPage } from '../pages/admin/UsersPage.jsx';
 import { AdminReportPage, ReportsPage } from '../pages/admin/ReportsPage.jsx';
 import { ReviewsPage } from '../pages/admin/ReviewsPage.jsx';
 import { AuditLogPage } from '../pages/admin/AuditLogPage.jsx';
-
-/** Builds child routes for a role area from its navigation list. */
-function placeholderRoutes(items) {
-  return items.map((item) => {
-    const element = <PlaceholderPage titleKey={item.labelKey} phase={item.phase} />;
-    return item.segment ? { path: item.segment, element } : { index: true, element };
-  });
-}
 
 /*
  * Route map
@@ -91,8 +82,7 @@ export const router = createBrowserRouter([
               { path: 'my-work', element: <MyWorkPage /> },
               { path: 'assignments/:assignmentId', element: <WorkerAssignmentPage /> },
               { path: 'profile', element: <WorkerProfilePage /> },
-              // Still planned (see navigation.js for the phase).
-              ...placeholderRoutes(workerNav.filter((item) => item.segment === 'notifications')),
+              { path: 'notifications', element: <NotificationsPage role="worker" /> },
             ],
           },
         ],
@@ -113,8 +103,7 @@ export const router = createBrowserRouter([
               { path: 'assignments', element: <EmployerAssignmentsPage /> },
               { path: 'assignments/:assignmentId', element: <EmployerAssignmentPage /> },
               { path: 'profile', element: <EmployerProfilePage /> },
-              // Still planned (see navigation.js for the phase).
-              ...placeholderRoutes([employerNotifications]),
+              { path: 'notifications', element: <NotificationsPage role="employer" /> },
             ],
           },
         ],

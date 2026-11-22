@@ -8,6 +8,7 @@ import { fetchWorkerProfile } from '../../services/workerService.js';
 import { fetchCategories } from '../../services/categoryService.js';
 import { fetchDistricts } from '../../services/referenceService.js';
 import { localName } from '../../utils/format.js';
+import { ProfileTrust } from '../../components/trust/ProfileTrust.jsx';
 
 /** Read-only view of the worker's own profile (editing comes later). */
 export function WorkerProfilePage() {
@@ -63,6 +64,7 @@ export function WorkerProfilePage() {
         )}
         <p className="mt-4 text-sm text-muted">{t('profile.editingLater')}</p>
       </Card>
+      <ProfileTrust />
     </div>
   );
 }

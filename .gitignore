@@ -21,6 +21,10 @@ server/data/
 *.log
 npm-debug.log*
 
+# Internal technical documentation & presentation guide (the repository is public)
+docs/SpotIt_Technical_Documentation.pdf
+docs/SpotIt_Presentation.pptx
+
 # OS / editor
 .DS_Store
 Thumbs.db

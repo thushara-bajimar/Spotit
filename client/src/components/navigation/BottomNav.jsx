@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { cx } from '../../utils/cx.js';
+import { UnreadBadge } from '../common/UnreadBadge.jsx';
 
 /** Fixed bottom tab bar for phones (hidden from the `md` breakpoint up). */
 export function BottomNav({ items }) {
@@ -12,7 +13,7 @@ export function BottomNav({ items }) {
       className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
     >
       <ul className="grid" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
-        {items.map(({ to, end, labelKey, icon: Icon }) => (
+        {items.map(({ to, end, labelKey, icon: Icon, badge }) => (
           <li key={to}>
             <NavLink
               to={to}
@@ -28,11 +29,12 @@ export function BottomNav({ items }) {
                 <>
                   <span
                     className={cx(
-                      'grid h-7 w-12 place-items-center rounded-full transition-colors',
+                      'relative grid h-7 w-12 place-items-center rounded-full transition-colors',
                       isActive && 'bg-forest-100',
                     )}
                   >
                     <Icon aria-hidden="true" className="size-5" />
+                    {badge && <UnreadBadge className="absolute -top-1 right-1" />}
                   </span>
                   <span className="line-clamp-2">{t(labelKey)}</span>
                 </>

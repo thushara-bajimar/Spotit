@@ -1,7 +1,14 @@
 import { todayInIndia } from '../../utils/dates.js';
 import { HttpError } from '../../utils/httpError.js';
-import { idParam, integer, oneOf, text, validateBody, validateQuery } from '../../utils/validation.js';
-import { ASSIGNMENT_GROUPS, getAssignment, listAssignments, performAssignmentAction } from './assignments.service.js';
+import { idParam, integer, isoDate, oneOf, runSchema, text, validateBody, validateQuery } from '../../utils/validation.js';
+import {
+  ASSIGNMENT_GROUPS,
+  getAssignment,
+  listAssignments,
+  performAssignmentAction,
+  performPaymentAction,
+  submitReview,
+} from './assignments.service.js';
 
 const ACTIONS = ['start', 'complete', 'cancel', 'dispute'];
 const NEEDS_REASON = ['cancel', 'dispute'];
@@ -36,6 +43,50 @@ export function addAssignmentRoutes(router, { db, role }) {
   router.get('/assignments/:assignmentId', (req, res) => {
     const assignmentId = idParam(req.params.assignmentId, 'ASSIGNMENT_NOT_FOUND');
     res.json({ assignment: getAssignment(db, { assignmentId, userId: req.user.id, role, today: todayInIndia() }) });
+  });
+
+  // Registered before '/:action' so 'review' and 'payment' are not taken as actions.
+  router.post(
+    '/assignments/:assignmentId/review',
+    validateBody({ rating: integer({ min: 1, max: 5, required: true }), comment: text({ min: 2, max: 500, required: false }) }),
+    (req, res) => {
+      const assignmentId = idParam(req.params.assignmentId, 'ASSIGNMENT_NOT_FOUND');
+      const assignment = submitReview(db, {
+        assignmentId,
+        userId: req.user.id,
+        role,
+        rating: req.body.rating,
+        comment: req.body.comment,
+        today: todayInIndia(),
+      });
+      res.status(201).json({ assignment });
+    },
+  );
+
+  const paymentSchemas = {
+    markPaid: {
+      amountPaid: integer({ min: 1, max: 10000000, required: true }),
+      paidOn: isoDate({ required: true }),
+      note: text({ min: 2, max: 300, required: false }),
+    },
+    confirm: {},
+    dispute: { reason: text({ min: 3, max: 500 }) },
+  };
+  router.post('/assignments/:assignmentId/payment/:action', (req, res) => {
+    const assignmentId = idParam(req.params.assignmentId, 'ASSIGNMENT_NOT_FOUND');
+    const schema = paymentSchemas[req.params.action];
+    if (!schema) throw new HttpError(404, 'NOT_FOUND', 'Unknown payment action.');
+    const { values, errors } = runSchema(schema, req.body);
+    if (errors.length > 0) throw new HttpError(400, 'VALIDATION_ERROR', 'Some fields are invalid.', errors);
+    const assignment = performPaymentAction(db, {
+      assignmentId,
+      userId: req.user.id,
+      role,
+      action: req.params.action,
+      input: values,
+      today: todayInIndia(),
+    });
+    res.json({ assignment });
   });
 
   router.post(

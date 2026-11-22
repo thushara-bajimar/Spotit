@@ -18,9 +18,9 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 | 4 | Employer module (profile, dashboard, job posting & management, applicant viewing) | **Done** |
 | 5 | Applications & assignments (accept/reject, capacity, assignments) | **Done** |
 | 6 | Admin (dashboard, approvals, users, moderation, audit log) | **Done** |
-| 7 | Trust (completion, payments, ratings, reports) | Planned |
-| 8 | Notifications & full translation review | Planned |
-| 9 | Testing & refinement | Planned |
+| 7 | Trust (completion, payments, ratings, reports) | **Done** |
+| 8 | Notifications & full translation review | **Done** (in-app notifications, bilingual review) |
+| 9 | Testing & refinement | **Done** (automated tests + full browser walkthrough) |
 
 **What works so far:**
 - Worker registration and employer registration. New employers start as *pending approval*.
@@ -37,9 +37,9 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 - Assignments for workers and employers: start, confirm completion on both sides, cancel, report a problem.
 - Admin panel: dashboard, employer and job approvals, user suspension, reports, review moderation, disputes and an audit log.
 
-**What does not work yet:**
-- Recording payments, ratings and submitting reports (Phase 7).
-- Notifications are stored but not shown yet (Phase 8).
+- Payment tracking (record, confirm, report unpaid wages), two-way ratings, user reports and in-app notifications.
+
+**Not included (by design, outside the MVP):** online payments, SMS/OTP, profile editing for workers, GPS-based distance sorting.
 
 ## Tech stack
 

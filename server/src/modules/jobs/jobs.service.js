@@ -1,5 +1,6 @@
 import { DISTRICTS } from '../../constants/districts.js';
 import { nowIso } from '../../utils/dates.js';
+import { RATING_SQL, ratingOf } from '../reviews/ratings.js';
 
 /*
  * Job marketplace queries for workers.
@@ -30,7 +31,8 @@ export const JOB_COLUMNS = `
   j.approval_status, j.status, j.created_at, j.reviewed_at,
   c.slug AS category_slug, c.name_en AS category_name_en, c.name_kn AS category_name_kn, c.icon AS category_icon,
   u.full_name AS employer_full_name, u.account_status AS employer_account_status, u.created_at AS employer_since,
-  ep.employer_type, ep.business_name, ep.verification_status AS employer_verification`;
+  ep.employer_type, ep.business_name, ep.verification_status AS employer_verification,
+  ${RATING_SQL('j.employer_id', 'employer_rating')}`;
 
 export const JOB_JOINS = `
   FROM jobs j
@@ -107,6 +109,7 @@ export function toJobSummary(row) {
       name: employerDisplayName(row),
       type: row.employer_type,
       verified: row.employer_verification === 'approved',
+      rating: ratingOf(row, 'employer_rating'),
     },
   };
 }

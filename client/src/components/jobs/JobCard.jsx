@@ -6,6 +6,7 @@ import { Wage } from './Wage.jsx';
 import { JobFacts } from './JobFacts.jsx';
 import { ApplicationStatusBadge } from './ApplicationStatusBadge.jsx';
 import { localName } from '../../utils/format.js';
+import { RatingSummary } from '../ui/Rating.jsx';
 
 /** Marketplace job card. The whole card is one link to the job details. */
 export function JobCard({ job }) {
@@ -37,6 +38,7 @@ export function JobCard({ job }) {
         <span className="flex min-w-0 items-center gap-1.5 text-muted">
           {job.employer.verified && <BadgeCheck aria-hidden="true" className="size-4 shrink-0 text-forest-500" />}
           <span className="truncate">{job.employer.name}</span>
+          {job.employer.rating?.count > 0 && <RatingSummary rating={job.employer.rating} className="shrink-0" />}
         </span>
         <span className="flex shrink-0 items-center gap-1 font-semibold text-forest-700">
           {t('jobs.viewDetails')}

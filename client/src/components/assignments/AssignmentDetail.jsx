@@ -12,6 +12,10 @@ import { CategoryIcon } from '../common/CategoryIcon.jsx';
 import { Wage } from '../jobs/Wage.jsx';
 import { JobFacts } from '../jobs/JobFacts.jsx';
 import { AssignmentStatusBadge } from './AssignmentStatusBadge.jsx';
+import { PaymentPanel } from '../trust/PaymentPanel.jsx';
+import { ReviewPanel } from '../trust/ReviewPanel.jsx';
+import { ReportForm } from '../trust/ReportForm.jsx';
+import { RatingSummary } from '../ui/Rating.jsx';
 import { useApiData } from '../../hooks/useApiData.js';
 import { assignmentActionRequest, fetchAssignment } from '../../services/assignmentService.js';
 import { formatTimestamp, localName } from '../../utils/format.js';
@@ -149,6 +153,10 @@ export function AssignmentDetail({ role }) {
   }
 
   const { job, payment } = assignment;
+  const onPanelChange = (_updated, flashKey) => {
+    setFlash(flashKey);
+    retry();
+  };
   const other = role === 'worker' ? assignment.employer : assignment.worker;
   const actions = ACTION_ORDER.filter((a) => assignment.actions.includes(a));
   const mine = role === 'worker' ? assignment.workerConfirmedAt : assignment.employerConfirmedAt;
@@ -184,9 +192,6 @@ export function AssignmentDetail({ role }) {
 
             <p className="mt-4 text-sm font-semibold text-muted">{t('assignments.agreedWage')}</p>
             <Wage amount={payment.agreedAmount} basis={payment.wageBasis} size="lg" />
-            <p className="mt-1 text-sm text-muted">
-              {t('assignments.paymentStatus')}: {t(`assignments.payment.${payment.status}`)}
-            </p>
 
             <JobFacts job={job} showVacancies={false} className="mt-4 border-t border-line pt-4 text-base" />
             <p className="mt-3">
@@ -202,11 +207,17 @@ export function AssignmentDetail({ role }) {
             </Notice>
           )}
 
+          {assignment.status !== 'confirmed' && assignment.status !== 'cancelled' && (
+            <PaymentPanel role={role} assignment={assignment} onChange={onPanelChange} />
+          )}
+          <ReviewPanel role={role} assignment={assignment} onChange={onPanelChange} />
+
           <Card className="p-5 sm:p-6">
             <h2 className="font-sans text-lg font-bold text-ink">{t(`assignments.contactTitle.${role}`)}</h2>
-            <p className="mt-2 flex items-center gap-2 font-semibold text-ink">
+            <p className="mt-2 flex flex-wrap items-center gap-2 font-semibold text-ink">
               <UserRound aria-hidden="true" className="size-4 text-forest-500" />
               {other.name}
+              <RatingSummary rating={other.rating} />
             </p>
             {other.phone && (
               <p className="mt-2 flex items-center gap-2">
@@ -228,6 +239,13 @@ export function AssignmentDetail({ role }) {
                 {[other.locality, other.district && localName(other.district, language)].filter(Boolean).join(', ')}
               </p>
             )}
+            <div className="mt-4 border-t border-line pt-3">
+              <ReportForm
+                target={{ type: 'assignment', id: assignment.id }}
+                label={t(`reports.reportPerson.${role === 'worker' ? 'employer' : 'worker'}`)}
+                categories={['misconduct', 'harassment', 'fake_account', 'unpaid_wage', 'other']}
+              />
+            </div>
           </Card>
 
           <Card className="p-5 sm:p-6">
@@ -243,7 +261,9 @@ export function AssignmentDetail({ role }) {
           {actions.length === 0 ? (
             <p className="flex items-start gap-2 text-sm text-muted">
               <CircleDot aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-              {t(`assignments.noActions.${assignment.status}`, { defaultValue: t('assignments.noActions.default') })}
+              {assignment.status === 'completed' && assignment.myReview && (payment.workerConfirmedAt || payment.actions.length === 0)
+                ? t('assignments.noActions.allDone')
+                : t(`assignments.noActions.${assignment.status}`, { defaultValue: t('assignments.noActions.default') })}
             </p>
           ) : (
             actions.map((action) => (

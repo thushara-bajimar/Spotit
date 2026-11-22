@@ -3,6 +3,7 @@ import { nowIso } from '../../utils/dates.js';
 import { DISTRICTS } from '../../constants/districts.js';
 import { EMPLOYER_TYPES_WITHOUT_BUSINESS } from '../../constants/users.js';
 import { JOB_COLUMNS, JOB_JOINS, expirePastJobs, toJobSummary } from '../jobs/jobs.service.js';
+import { RATING_SQL, ratingOf } from '../reviews/ratings.js';
 
 /*
  * Employer-side business rules.
@@ -421,7 +422,8 @@ export function listApplicants(db, employerId, { jobId, status }) {
               j.id AS job_id, j.title AS job_title, j.status AS job_status, j.approval_status AS job_approval,
               u.id AS worker_id, u.full_name AS worker_name, u.created_at AS worker_since, u.phone AS worker_phone,
               wp.district AS worker_district, wp.locality AS worker_locality, wp.skills AS worker_skills,
-              s.id AS assignment_id, s.status AS assignment_status
+              s.id AS assignment_id, s.status AS assignment_status,
+              ${RATING_SQL('u.id', 'worker_rating')}
          FROM applications a
          JOIN jobs j ON j.id = a.job_id
          JOIN users u ON u.id = a.worker_id
@@ -449,6 +451,7 @@ export function listApplicants(db, employerId, { jobId, status }) {
       id: row.worker_id,
       name: row.worker_name,
       phone: row.status === 'accepted' ? row.worker_phone : null,
+      rating: ratingOf(row, 'worker_rating'),
       district: row.worker_district ? districtOf(row.worker_district) : null,
       locality: row.worker_locality,
       skills: row.worker_skills ? JSON.parse(row.worker_skills) : [],

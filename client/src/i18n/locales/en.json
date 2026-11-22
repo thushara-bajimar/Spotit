@@ -256,7 +256,13 @@
     "REPORT_NOT_FOUND": "Report not found.",
     "REPORT_ALREADY_CLOSED": "This report is already closed.",
     "REVIEW_NOT_FOUND": "Review not found.",
-    "NOT_DISPUTED": "This work is no longer in dispute."
+    "NOT_DISPUTED": "This work is no longer in dispute.",
+    "PAYMENT_ACTION_NOT_ALLOWED": "This payment action is not possible now. Please refresh the page.",
+    "REVIEW_NOT_ALLOWED": "You can rate only after the work is completed.",
+    "ALREADY_REVIEWED": "You have already rated this work.",
+    "REPORT_TARGET_NOT_FOUND": "This item cannot be reported.",
+    "ALREADY_REPORTED": "You already have an open report about this.",
+    "NOTIFICATION_NOT_FOUND": "Notification not found."
   },
   "notFound": {
     "title": "Page not found",
@@ -293,7 +299,8 @@
     "too_long_period": "The work period can be at most 6 months.",
     "same_time": "The end time must be different from the start time.",
     "invalid_time": "Enter a valid time.",
-    "below_assigned": "You already have more workers confirmed than this."
+    "below_assigned": "You already have more workers confirmed than this.",
+    "date_in_future": "This date is in the future."
   },
   "jobs": {
     "title": "Find work",
@@ -684,10 +691,11 @@
     "history": "History",
     "nextSteps": "Next steps",
     "noActions": {
-      "completed": "This work is complete. Payments and ratings are coming soon.",
+      "completed": "This work is complete. Record the payment and rate each other below.",
       "cancelled": "This work was cancelled.",
       "disputed": "An admin will look into this dispute.",
-      "default": "Nothing to do right now."
+      "default": "Nothing to do right now.",
+      "allDone": "All done. Thank you for using SpotIt."
     },
     "waitingFor": {
       "worker": "You confirmed the work is done. Waiting for the employer to confirm.",
@@ -737,7 +745,13 @@
       "start": "Marked as started.",
       "complete": "Your confirmation was recorded.",
       "cancel": "This work has been cancelled.",
-      "dispute": "Your problem report was recorded. An admin will review it."
+      "dispute": "Your problem report was recorded. An admin will review it.",
+      "payment": {
+        "markPaid": "Payment recorded.",
+        "confirm": "Thank you — payment confirmed.",
+        "dispute": "Your report about the payment was sent."
+      },
+      "review": "Thank you for your rating."
     },
     "actions": {
       "start": {
@@ -1047,5 +1061,139 @@
         "assignment": "Work"
       }
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Updates about your jobs and work.",
+    "markAll": "Mark all as read",
+    "unread": "Unread",
+    "unreadSr_one": "{{count}} unread notification",
+    "unreadSr_other": "{{count}} unread notifications",
+    "empty": "No notifications yet.",
+    "emptyUnread": "You're all caught up.",
+    "loadError": "We couldn't load your notifications.",
+    "by": {
+      "worker": "worker",
+      "employer": "employer",
+      "admin": "admin"
+    },
+    "outcome": {
+      "completed": "counted as completed",
+      "cancelled": "work cancelled"
+    },
+    "types": {
+      "generic": "You have a new update.",
+      "application_received": "{{workerName}} applied for “{{jobTitle}}”.",
+      "application_accepted": "You were selected for “{{jobTitle}}”.",
+      "application_rejected": "You were not selected for “{{jobTitle}}” this time.",
+      "job_updated": "The employer changed “{{jobTitle}}”. Please check the details.",
+      "job_closed": "“{{jobTitle}}” is no longer accepting applications.",
+      "job_cancelled": "“{{jobTitle}}” was cancelled by the employer.",
+      "assignment_started": "Work on “{{jobTitle}}” has started.",
+      "assignment_completion_requested": "The {{by}} confirmed “{{jobTitle}}” is done. Please confirm too.",
+      "assignment_completed": "“{{jobTitle}}” is completed. You can now rate each other.",
+      "assignment_cancelled": "Work on “{{jobTitle}}” was cancelled by the {{by}}.",
+      "assignment_disputed": "The {{by}} reported a problem with “{{jobTitle}}”.",
+      "employer_approved": "Your employer account was approved. You can now post jobs.",
+      "employer_rejected": "Your employer account was not approved. Reason: {{reason}}",
+      "job_approved": "“{{jobTitle}}” was approved and is now visible to workers.",
+      "job_rejected": "“{{jobTitle}}” was not approved. Reason: {{reason}}",
+      "report_resolved": "Your report was resolved: {{note}}",
+      "report_dismissed": "Your report was closed: {{note}}",
+      "review_hidden": "A rating you wrote was hidden by an admin. Reason: {{reason}}",
+      "dispute_resolved": "The problem with “{{jobTitle}}” was settled by an admin: {{outcome}}.",
+      "payment_marked_paid": "The employer recorded a payment of {{amount}} for “{{jobTitle}}”. Please confirm if you received it.",
+      "payment_confirmed": "The worker confirmed receiving payment for “{{jobTitle}}”.",
+      "payment_disputed": "The worker says payment for “{{jobTitle}}” was not received: {{reason}}",
+      "review_received": "You received a {{rating}}-star rating for “{{jobTitle}}”."
+    }
+  },
+  "ratings": {
+    "none": "No ratings yet",
+    "summary": "Rated {{average}} out of 5 from {{count}} ratings",
+    "stars_one": "{{count}} star",
+    "stars_other": "{{count}} stars",
+    "labels": {
+      "1": "Poor",
+      "2": "Below average",
+      "3": "Okay",
+      "4": "Good",
+      "5": "Excellent"
+    },
+    "title": "Ratings",
+    "yourRating": "Your rating",
+    "rateThe": {
+      "worker": "Rate the worker",
+      "employer": "Rate the employer"
+    },
+    "comment": "Comment",
+    "commentHint": "What went well, or what could be better? Please be respectful.",
+    "submit": "Submit rating",
+    "pickStars": "Choose 1 to 5 stars.",
+    "theirRating": {
+      "worker": "The worker's rating of you",
+      "employer": "The employer's rating of you"
+    },
+    "notYetRated": {
+      "worker": "The worker has not rated you yet.",
+      "employer": "The employer has not rated you yet."
+    },
+    "hiddenByAdmin": "Hidden by an admin.",
+    "aboutMe": "Ratings about me",
+    "noReviewsYet": "No ratings yet. They appear after completed work."
+  },
+  "payments": {
+    "title": "Payment",
+    "markPaid": "Record payment",
+    "markPaidExplain": "Record the payment you made to the worker (cash, UPI or bank). SpotIt does not transfer money.",
+    "amountPaid": "Amount paid (₹)",
+    "paidOn": "Date paid",
+    "note": "Note",
+    "noteHint": "For example: paid by UPI",
+    "markPaidYes": "Save payment",
+    "recorded": "Recorded as paid: {{amount}} on {{date}}.",
+    "workerConfirmed": "Worker confirmed receiving it on {{date}}.",
+    "disputed": "Worker says the payment was not received",
+    "confirm": "I received this payment",
+    "confirmTitle": "Confirm you received the payment?",
+    "confirmExplain": "This closes the payment record.",
+    "confirmYes": "Yes, I received it",
+    "dispute": "Report payment not received",
+    "disputeTitle": "Report that you were not paid?",
+    "disputeExplain": "The employer is told and an admin will look into it.",
+    "disputeYes": "Send report",
+    "disclaimer": "SpotIt only records payments made between you. It does not process or guarantee payments.",
+    "waiting": {
+      "worker": {
+        "pending": "The employer has not recorded a payment yet.",
+        "paid": "The employer recorded a payment.",
+        "disputed": "You reported this payment. The employer or an admin will follow up."
+      },
+      "employer": {
+        "pending": "Record the payment once you have paid the worker.",
+        "paid": "Waiting for the worker to confirm they received it.",
+        "disputed": "The worker says they were not paid. Record the payment once you have paid."
+      }
+    }
+  },
+  "reports": {
+    "open": "Report a problem",
+    "explain": "Tell us what happened. An admin will review your report.",
+    "category": "What is the problem?",
+    "description": "Details",
+    "descriptionHint": "At least 10 characters. Do not share passwords or bank details.",
+    "submit": "Send report",
+    "sent": "Thank you. Your report was sent to the SpotIt team.",
+    "reportPerson": {
+      "worker": "Report a problem with this worker",
+      "employer": "Report a problem with this employer"
+    },
+    "reportJob": "Report this job",
+    "reportReview": "Report this rating",
+    "alreadyReported": "You have reported this rating.",
+    "mine": "My reports",
+    "noneYet": "You haven't made any reports.",
+    "adminResponse": "Admin response",
+    "general": "Report another problem"
   }
 }

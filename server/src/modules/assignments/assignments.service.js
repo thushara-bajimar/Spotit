@@ -2,6 +2,7 @@ import { HttpError } from '../../utils/httpError.js';
 import { nowIso } from '../../utils/dates.js';
 import { DISTRICTS } from '../../constants/districts.js';
 import { expirePastJobs, findJobRow, toJobSummary, unavailableReason } from '../jobs/jobs.service.js';
+import { RATING_SQL, ratingOf } from '../reviews/ratings.js';
 
 /*
  * Selecting workers and managing assignments.
@@ -130,7 +131,15 @@ const ASSIGNMENT_SELECT = `
   SELECT s.id AS assignment_id, s.status AS assignment_status, s.created_at AS confirmed_at, s.started_at,
          s.worker_confirmed_at, s.employer_confirmed_at, s.completed_at, s.cancelled_at, s.cancellation_reason,
          s.cancelled_by, s.disputed_at, s.disputed_by, s.dispute_reason, s.worker_id, s.application_id,
-         p.agreed_amount, p.wage_basis AS agreed_basis, p.status AS payment_status,
+         p.agreed_amount, p.wage_basis AS agreed_basis, p.status AS payment_status, p.amount_paid, p.paid_on,
+         p.employer_marked_paid_at, p.worker_confirmed_at AS payment_worker_confirmed_at,
+         p.disputed_at AS payment_disputed_at, p.dispute_reason AS payment_dispute_reason, p.notes AS payment_notes,
+         wr.rating AS worker_review_rating, wr.comment AS worker_review_comment, wr.created_at AS worker_review_at,
+         wr.moderation_status AS worker_review_status,
+         er.rating AS employer_review_rating, er.comment AS employer_review_comment, er.created_at AS employer_review_at,
+         er.moderation_status AS employer_review_status,
+         ${RATING_SQL('j.employer_id', 'employer_rating')},
+         ${RATING_SQL('s.worker_id', 'worker_rating')},
          j.id, j.title, j.district, j.locality, j.address, j.start_date, j.end_date, j.start_time, j.end_time,
          j.duration_type, j.wage_amount, j.wage_basis, j.workers_required, j.workers_assigned,
          j.approval_status, j.status, j.created_at, j.reviewed_at, j.employer_id,
@@ -146,7 +155,9 @@ const ASSIGNMENT_SELECT = `
     JOIN employer_profiles ep ON ep.user_id = j.employer_id
     JOIN users wu ON wu.id = s.worker_id
     LEFT JOIN payments p ON p.assignment_id = s.id
-    LEFT JOIN worker_profiles wp ON wp.user_id = s.worker_id`;
+    LEFT JOIN worker_profiles wp ON wp.user_id = s.worker_id
+    LEFT JOIN reviews wr ON wr.assignment_id = s.id AND wr.reviewer_id = s.worker_id
+    LEFT JOIN reviews er ON er.assignment_id = s.id AND er.reviewer_id = j.employer_id`;
 
 /** Which actions the given role may take right now. */
 function allowedActions(row, role, today) {
@@ -164,6 +175,21 @@ function allowedActions(row, role, today) {
   return actions;
 }
 
+/** Payment actions available to `role` right now. */
+const WORK_STARTED = ['in_progress', 'completion_pending', 'completed', 'disputed'];
+function paymentActions(row, role) {
+  const actions = [];
+  if (!row.payment_status || row.payment_worker_confirmed_at) return actions; // final once confirmed
+  if (!WORK_STARTED.includes(row.assignment_status)) return actions;
+  if (role === 'employer' && ['pending', 'disputed'].includes(row.payment_status)) actions.push('markPaid');
+  if (role === 'worker' && row.payment_status === 'paid') actions.push('confirm');
+  if (role === 'worker' && ['pending', 'paid'].includes(row.payment_status)) actions.push('dispute');
+  return actions;
+}
+
+const reviewOf = (rating, comment, at, status) =>
+  rating == null ? null : { rating, comment, createdAt: at, hidden: status === 'hidden' };
+
 const whoDid = (row, userId) => {
   if (userId == null) return null;
   if (userId === row.worker_id) return 'worker';
@@ -176,15 +202,21 @@ function toAssignment(row, role, today) {
   const job = toJobSummary(row);
   const counterpart =
     role === 'worker'
-      ? { ...job.employer, phone: row.employer_phone }
+      ? { ...job.employer, phone: row.employer_phone, rating: ratingOf(row, 'employer_rating') }
       : {
           name: row.worker_name,
           phone: row.worker_phone,
           district: districtOf(row.worker_district),
           locality: row.worker_locality,
           skills: row.worker_skills ? JSON.parse(row.worker_skills) : [],
+          rating: ratingOf(row, 'worker_rating'),
         };
   delete job.employer;
+
+  const workerReview = reviewOf(row.worker_review_rating, row.worker_review_comment, row.worker_review_at, row.worker_review_status);
+  const employerReview = reviewOf(row.employer_review_rating, row.employer_review_comment, row.employer_review_at, row.employer_review_status);
+  const myReview = role === 'worker' ? workerReview : employerReview;
+  const theirReview = role === 'worker' ? employerReview : workerReview;
 
   return {
     id: row.assignment_id,
@@ -202,9 +234,25 @@ function toAssignment(row, role, today) {
     disputedBy: whoDid(row, row.disputed_by),
     disputeReason: row.dispute_reason,
     job: { ...job, address: row.address },
-    payment: { agreedAmount: row.agreed_amount, wageBasis: row.agreed_basis, status: row.payment_status },
+    payment: {
+      agreedAmount: row.agreed_amount,
+      wageBasis: row.agreed_basis,
+      status: row.payment_status,
+      amountPaid: row.amount_paid,
+      paidOn: row.paid_on,
+      employerMarkedPaidAt: row.employer_marked_paid_at,
+      workerConfirmedAt: row.payment_worker_confirmed_at,
+      disputedAt: row.payment_disputed_at,
+      disputeReason: row.payment_dispute_reason,
+      notes: row.payment_notes,
+      actions: paymentActions(row, role),
+    },
     [role === 'worker' ? 'employer' : 'worker']: counterpart,
     actions: allowedActions(row, role, today),
+    myReview,
+    // A hidden review is not shown to the person it is about.
+    theirReview: theirReview && !theirReview.hidden ? theirReview : null,
+    canReview: row.assignment_status === 'completed' && !myReview,
   };
 }
 
@@ -298,4 +346,91 @@ export function performAssignmentAction(db, { assignmentId, userId, role, action
 /** Assignment id for a worker's accepted application (to link from job pages). */
 export function assignmentIdForApplication(db, applicationId) {
   return db.prepare('SELECT id FROM assignments WHERE application_id = ?').pluck().get(applicationId) ?? null;
+}
+
+// ---------------------------------------------------------------------------
+// Payment tracking (records what happened outside the app; no money moves here)
+// ---------------------------------------------------------------------------
+
+/**
+ *   markPaid (employer): pending/disputed → paid, with amount and date paid
+ *   confirm  (worker):   paid → worker confirms receipt (final)
+ *   dispute  (worker):   pending/paid → disputed, and an 'unpaid_wage' report
+ *                        is opened for admins (unless one is already open)
+ * Allowed only once work has started and before the worker confirmed receipt.
+ */
+export function performPaymentAction(db, { assignmentId, userId, role, action, input, today }) {
+  return db
+    .transaction(() => {
+      const row = findOwnAssignmentRow(db, { assignmentId, userId, role });
+      if (!paymentActions(row, role).includes(action)) {
+        throw new HttpError(409, 'PAYMENT_ACTION_NOT_ALLOWED', 'This payment action is not possible now.', {
+          paymentStatus: row.payment_status,
+          action,
+        });
+      }
+      const now = nowIso();
+      const refs = { jobId: row.id, assignmentId, applicationId: row.application_id };
+
+      if (action === 'markPaid') {
+        if (input.paidOn > today) {
+          throw new HttpError(400, 'VALIDATION_ERROR', 'Some fields are invalid.', [{ field: 'paidOn', code: 'date_in_future' }]);
+        }
+        db.prepare(
+          `UPDATE payments SET status = 'paid', amount_paid = ?, paid_on = ?, notes = ?, employer_marked_paid_at = ?,
+                  updated_at = ? WHERE assignment_id = ?`,
+        ).run(input.amountPaid, input.paidOn, input.note ?? null, now, now, assignmentId);
+        notify(db, row.worker_id, 'payment_marked_paid', { jobTitle: row.title, amount: input.amountPaid }, refs);
+      } else if (action === 'confirm') {
+        db.prepare('UPDATE payments SET worker_confirmed_at = ?, updated_at = ? WHERE assignment_id = ?').run(now, now, assignmentId);
+        notify(db, row.employer_id, 'payment_confirmed', { jobTitle: row.title }, refs);
+      } else if (action === 'dispute') {
+        db.prepare(
+          `UPDATE payments SET status = 'disputed', disputed_at = ?, dispute_reason = ?, updated_at = ? WHERE assignment_id = ?`,
+        ).run(now, input.reason, now, assignmentId);
+        const openReport = db
+          .prepare(
+            `SELECT 1 FROM reports WHERE reporter_id = ? AND assignment_id = ? AND category = 'unpaid_wage'
+                AND status IN ('pending', 'under_review')`,
+          )
+          .get(userId, assignmentId);
+        if (!openReport) {
+          db.prepare(
+            `INSERT INTO reports (reporter_id, category, description, reported_user_id, job_id, assignment_id)
+             VALUES (?, 'unpaid_wage', ?, ?, ?, ?)`,
+          ).run(userId, input.reason, row.employer_id, row.id, assignmentId);
+        }
+        notify(db, row.employer_id, 'payment_disputed', { jobTitle: row.title, reason: input.reason }, refs);
+      }
+      return toAssignment(findOwnAssignmentRow(db, { assignmentId, userId, role }), role, today);
+    })
+    .immediate();
+}
+
+// ---------------------------------------------------------------------------
+// Reviews (two-way, completed assignments only, one per reviewer)
+// ---------------------------------------------------------------------------
+
+export function submitReview(db, { assignmentId, userId, role, rating, comment, today }) {
+  return db
+    .transaction(() => {
+      const row = findOwnAssignmentRow(db, { assignmentId, userId, role });
+      if (row.assignment_status !== 'completed') {
+        throw new HttpError(409, 'REVIEW_NOT_ALLOWED', 'You can rate only after the work is completed.');
+      }
+      const revieweeId = role === 'worker' ? row.employer_id : row.worker_id;
+      const existing = db.prepare('SELECT 1 FROM reviews WHERE assignment_id = ? AND reviewer_id = ?').get(assignmentId, userId);
+      if (existing) throw new HttpError(409, 'ALREADY_REVIEWED', 'You have already rated this work.');
+
+      db.prepare('INSERT INTO reviews (assignment_id, reviewer_id, reviewee_id, rating, comment) VALUES (?, ?, ?, ?, ?)').run(
+        assignmentId,
+        userId,
+        revieweeId,
+        rating,
+        comment ?? null,
+      );
+      notify(db, revieweeId, 'review_received', { jobTitle: row.title, rating }, { jobId: row.id, assignmentId });
+      return toAssignment(findOwnAssignmentRow(db, { assignmentId, userId, role }), role, today);
+    })
+    .immediate();
 }

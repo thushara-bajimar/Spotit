@@ -421,6 +421,72 @@ change itself.
 - A suspended worker can't be accepted for a job.
 - All applications, assignments, jobs, reviews and reports are kept.
 
+## Payments, ratings, reports and notifications (Phase 7)
+
+### Payment tracking: `POST /api/{worker|employer}/assignments/:id/payment/:action`
+SpotIt only **records** payments made outside the app. It never moves money and does not guarantee
+payment. Payment actions become available once work has started (`in_progress`, `completion_pending`,
+`completed` or `disputed`). After the worker confirms receipt, the payment is final.
+
+| Action | Who | Body | Effect |
+|---|---|---|---|
+| `markPaid` | employer | `{ amountPaid, paidOn (≤ today), note? }` | `pending` or `disputed` becomes `paid`. The worker is notified. |
+| `confirm` | worker | – | Records the worker's confirmation (only when `paid`). The employer is notified. |
+| `dispute` | worker | `{ reason }` | `pending` or `paid` becomes `disputed`. An `unpaid_wage` report opens for admins, and the employer is notified. |
+
+Any other action gets 409 `PAYMENT_ACTION_NOT_ALLOWED`. Database triggers also enforce the allowed
+status changes, and that payments are final once confirmed. Each assignment's `payment` object now
+includes `amountPaid`, `paidOn`, `employerMarkedPaidAt`, `workerConfirmedAt`, `disputedAt`,
+`disputeReason`, `notes` and `actions`.
+
+### Ratings: `POST /api/{worker|employer}/assignments/:id/review`
+Body: `{ rating: 1–5, comment? }`. Allowed only when the assignment is `completed`; otherwise 409
+`REVIEW_NOT_ALLOWED`. Each side can rate once, and a second attempt gets 409 `ALREADY_REVIEWED`. The
+other party is notified.
+
+The assignment now includes `myReview`, `theirReview` (omitted when an admin has hidden it) and
+`canReview`. Ratings (`{ average, count }`, visible reviews only) appear in these places:
+- the employer on job cards and job details
+- the worker on applicant cards
+- both people on assignments
+
+`GET /api/reviews/received` returns `{ rating, reviews }`: visible reviews about the caller.
+
+### Reports: `/api/reports` (workers and employers)
+`POST /` with body `{ category, description (10–2000), targetType: job|assignment|review|none, targetId? }`.
+The server works out who the report is about from the target:
+
+| Target | Who can report it | Reported user |
+|---|---|---|
+| `job` | anyone who can see the job | its employer |
+| `assignment` | either party | the other party |
+| `review` | only the person the review is about | the reviewer |
+| `none` | anyone | none; only the `other` category is allowed |
+
+A second open report on the same target gets 409 `ALREADY_REPORTED`. `GET /mine` returns the caller's
+reports and the admin's response.
+
+### Notifications: `/api/notifications` (any signed-in user)
+| Endpoint | Returns |
+|---|---|
+| `GET /?unread=1&page=` | `{ notifications, unreadCount, page, pageSize, total, totalPages }`, newest first, 20 per page |
+| `GET /unread-count` | `{ unreadCount }` |
+| `POST /:id/read` | Marks one as read. Only the recipient can do this; anyone else gets 404. |
+| `POST /read-all` | Marks all as read |
+
+Each notification has a `type`, JSON `params`, and references (`jobId`, `applicationId`, `assignmentId`,
+`reportId`). The client renders the text in the reader's language.
+
+Types:
+- Applications: `application_received`, `application_accepted`, `application_rejected`
+- Jobs: `job_updated`, `job_closed`, `job_cancelled`, `job_approved`, `job_rejected`
+- Work: `assignment_started`, `assignment_completion_requested`, `assignment_completed`,
+  `assignment_cancelled`, `assignment_disputed`
+- Accounts: `employer_approved`, `employer_rejected`
+- Reports and moderation: `report_resolved`, `report_dismissed`, `review_hidden`, `dispute_resolved`
+- Payments: `payment_marked_paid`, `payment_confirmed`, `payment_disputed`
+- Ratings: `review_received`
+
 ## Role-protected endpoints
 
 Every route under these paths checks the role on the server.
