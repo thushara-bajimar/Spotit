@@ -25,7 +25,14 @@ import { EmployerAssignmentsPage } from '../pages/employer/EmployerAssignmentsPa
 import { EmployerAssignmentPage, WorkerAssignmentPage } from '../pages/assignments/AssignmentPages.jsx';
 import { PlaceholderPage } from '../pages/dashboard/PlaceholderPage.jsx';
 import { NotFoundPage } from '../pages/NotFoundPage.jsx';
-import { adminNav, employerNotifications, workerNav } from './navigation.js';
+import { employerNotifications, workerNav } from './navigation.js';
+import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage.jsx';
+import { AdminEmployerPage, EmployerApprovalsPage } from '../pages/admin/EmployerApprovalsPage.jsx';
+import { AdminJobPage, JobApprovalsPage } from '../pages/admin/JobApprovalsPage.jsx';
+import { AdminUserPage, UsersPage } from '../pages/admin/UsersPage.jsx';
+import { AdminReportPage, ReportsPage } from '../pages/admin/ReportsPage.jsx';
+import { ReviewsPage } from '../pages/admin/ReviewsPage.jsx';
+import { AuditLogPage } from '../pages/admin/AuditLogPage.jsx';
 
 /** Builds child routes for a role area from its navigation list. */
 function placeholderRoutes(items) {
@@ -114,7 +121,26 @@ export const router = createBrowserRouter([
       },
       {
         element: <RequireRole roles={['admin']} />,
-        children: [{ path: 'admin', element: <AdminLayout />, children: placeholderRoutes(adminNav) }],
+        children: [
+          {
+            path: 'admin',
+            element: <AdminLayout />,
+            children: [
+              { index: true, element: <AdminDashboardPage /> },
+              { path: 'employer-approvals', element: <EmployerApprovalsPage /> },
+              { path: 'employer-approvals/:employerId', element: <AdminEmployerPage /> },
+              { path: 'job-approvals', element: <JobApprovalsPage /> },
+              { path: 'job-approvals/:jobId', element: <AdminJobPage /> },
+              { path: 'workers', element: <UsersPage key="worker" role="worker" /> },
+              { path: 'employers', element: <UsersPage key="employer" role="employer" /> },
+              { path: 'users/:userId', element: <AdminUserPage /> },
+              { path: 'reports', element: <ReportsPage /> },
+              { path: 'reports/:reportId', element: <AdminReportPage /> },
+              { path: 'reviews', element: <ReviewsPage /> },
+              { path: 'audit-log', element: <AuditLogPage /> },
+            ],
+          },
+        ],
       },
     ],
   },

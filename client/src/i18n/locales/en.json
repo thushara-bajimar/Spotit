@@ -247,7 +247,16 @@
     "ASSIGNMENT_NOT_FOUND": "This work could not be found.",
     "ACTION_NOT_ALLOWED": "This action is not possible right now. Please refresh the page.",
     "JOB_HAS_WORKERS": "Workers are already confirmed, so only the number of workers can be changed.",
-    "JOB_NOT_CANCELLABLE": "This job can no longer be cancelled because work has already started."
+    "JOB_NOT_CANCELLABLE": "This job can no longer be cancelled because work has already started.",
+    "EMPLOYER_NOT_FOUND": "Employer not found.",
+    "ALREADY_DECIDED": "This has already been decided. Refresh the page.",
+    "JOB_NOT_REVIEWABLE": "Only open jobs can be approved.",
+    "USER_NOT_FOUND": "Account not found.",
+    "CANNOT_SUSPEND_ADMIN": "Admin accounts cannot be suspended here.",
+    "REPORT_NOT_FOUND": "Report not found.",
+    "REPORT_ALREADY_CLOSED": "This report is already closed.",
+    "REVIEW_NOT_FOUND": "Review not found.",
+    "NOT_DISPUTED": "This work is no longer in dispute."
   },
   "notFound": {
     "title": "Page not found",
@@ -721,7 +730,8 @@
     },
     "by": {
       "worker": "by the worker",
-      "employer": "by the employer"
+      "employer": "by the employer",
+      "admin": "by an admin"
     },
     "flash": {
       "start": "Marked as started.",
@@ -765,6 +775,276 @@
           "worker": "Use this if you disagree about the work. An admin will review it.",
           "employer": "Use this if you disagree about the work. An admin will review it."
         }
+      }
+    }
+  },
+  "admin": {
+    "notFound": "This record could not be found.",
+    "loadError": "We couldn't load this page.",
+    "search": "Search",
+    "history": "Decision history",
+    "decision": "Decision",
+    "reasonShown": "Reason (shown to the employer)",
+    "noteShown": "Note (shown to the people involved)",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "active": "Active",
+      "suspended": "Suspended",
+      "under_review": "Under review",
+      "resolved": "Resolved",
+      "dismissed": "Dismissed",
+      "visible": "Visible",
+      "hidden": "Hidden"
+    },
+    "lifecycle": {
+      "draft": "Draft",
+      "open": "Open",
+      "filled": "Filled",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "closed": "Closed",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "actions": {
+      "employer": {
+        "approve": "Employer approved",
+        "reject": "Employer rejected"
+      },
+      "job": {
+        "approve": "Job approved",
+        "reject": "Job rejected"
+      },
+      "user": {
+        "suspend": "Account suspended",
+        "reactivate": "Account reactivated"
+      },
+      "report": {
+        "review": "Report taken under review",
+        "resolve": "Report resolved",
+        "dismiss": "Report dismissed"
+      },
+      "review": {
+        "hide": "Review hidden",
+        "restore": "Review restored"
+      },
+      "dispute": {
+        "resolve": "Dispute resolved"
+      }
+    },
+    "dashboard": {
+      "title": "Admin dashboard",
+      "subtitle": "What needs attention today.",
+      "queueEmpty": "Nothing waiting.",
+      "employerQueue": "Employers waiting for approval",
+      "jobQueue": "Jobs waiting for approval",
+      "stats": {
+        "pendingEmployers": "Employers to review",
+        "pendingJobs": "Jobs to review",
+        "openReports": "Open reports",
+        "openDisputes": "Open disputes",
+        "workers": "Workers",
+        "employers": "Employers",
+        "activeJobs": "Live jobs",
+        "suspendedUsers": "Suspended accounts"
+      }
+    },
+    "employers": {
+      "title": "Employer approvals",
+      "subtitle": "Review employers before they can post jobs.",
+      "searchPlaceholder": "Name, business or phone",
+      "empty": "No employers here.",
+      "submitted": "Submitted {{date}}",
+      "jobCount_one": "{{count}} job",
+      "jobCount_other": "{{count}} jobs",
+      "back": "Back to employer approvals",
+      "registered": "Registered",
+      "submittedLabel": "Submitted for review",
+      "manageAccount": "Manage this account",
+      "recentJobs": "Recent jobs",
+      "noJobs": "No jobs posted yet.",
+      "approve": "Approve employer",
+      "approveConfirm": "Approve this employer?",
+      "approveExplain": "They will be able to post jobs. Each job is still reviewed separately.",
+      "approveYes": "Yes, approve",
+      "reject": "Reject employer",
+      "revoke": "Revoke approval",
+      "rejectConfirm": "Reject this employer?",
+      "rejectExplain": "They cannot post jobs and their jobs are hidden from workers. They can fix their details and be reviewed again.",
+      "rejectYes": "Reject",
+      "flash": {
+        "approve": "Employer approved.",
+        "reject": "Employer rejected."
+      }
+    },
+    "jobs": {
+      "title": "Job approvals",
+      "subtitle": "Check each job before workers can see it.",
+      "searchPlaceholder": "Job title or employer",
+      "empty": "No jobs here.",
+      "resubmitted": "Edited after approval",
+      "resubmittedHelp": "The employer changed this job after it was approved. Check the changes before approving it again.",
+      "updated": "Updated {{date}}",
+      "back": "Back to job approvals",
+      "viewEmployer": "View employer",
+      "employerNotApproved": "This employer is not approved, so workers will not see this job even if it is approved.",
+      "approve": "Approve job",
+      "approveConfirm": "Approve this job?",
+      "approveExplain": "It will appear in the worker marketplace.",
+      "approveYes": "Yes, approve",
+      "reject": "Reject job",
+      "takeDown": "Take job down",
+      "rejectConfirm": "Reject this job?",
+      "rejectExplain": "It will not be shown to workers. The employer sees your reason and can edit and resubmit it.",
+      "rejectYes": "Reject",
+      "rejectedNote": "This job was rejected. It will come back here if the employer edits it.",
+      "flash": {
+        "approve": "Job approved — it is now visible to workers.",
+        "reject": "Job rejected."
+      }
+    },
+    "users": {
+      "title": {
+        "worker": "Workers",
+        "employer": "Employers"
+      },
+      "subtitle": "Search accounts, check their activity and suspend or reactivate them.",
+      "searchPlaceholder": "Name, phone or business",
+      "empty": "No accounts found.",
+      "count_one": "{{count}} account",
+      "count_other": "{{count}} accounts",
+      "joined": "Joined {{date}}",
+      "back": "Back to the list",
+      "flash": {
+        "suspend": "Account suspended. The user has been logged out.",
+        "reactivate": "Account reactivated."
+      },
+      "suspendedSince": "Suspended on {{date}}",
+      "lastLogin": "Last login",
+      "viewEmployerReview": "View employer approval",
+      "activity": "Activity",
+      "activityKeys": {
+        "applications": "Applications",
+        "activeAssignments": "Active work",
+        "completedAssignments": "Completed work",
+        "jobs": "Jobs posted",
+        "liveJobs": "Live jobs",
+        "reportsAgainst": "Reports against",
+        "reportsMade": "Reports made"
+      },
+      "ratings_one": "{{count}} rating",
+      "ratings_other": "{{count}} ratings",
+      "account": "Account",
+      "suspend": "Suspend account",
+      "suspendConfirm": "Suspend this account?",
+      "suspendExplain": "They are logged out and cannot log in. Their jobs are hidden and they cannot be selected for work. Nothing is deleted.",
+      "suspendYes": "Suspend",
+      "reactivate": "Reactivate account",
+      "reactivateConfirm": "Reactivate this account?",
+      "reactivateExplain": "They will be able to log in again.",
+      "reactivateYes": "Reactivate"
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Complaints from workers and employers.",
+      "empty": "No reports here.",
+      "by": "By {{name}}",
+      "about": "about {{name}}",
+      "back": "Back to reports",
+      "flash": {
+        "review": "Report marked as under review.",
+        "resolve": "Report resolved. The reporter has been told.",
+        "dismiss": "Report dismissed. The reporter has been told."
+      },
+      "categories": {
+        "misleading_job": "Misleading job",
+        "unpaid_wage": "Unpaid wage",
+        "misconduct": "Misconduct",
+        "harassment": "Harassment",
+        "fake_account": "Fake account",
+        "spam": "Spam",
+        "other": "Other"
+      },
+      "reporter": "Reported by",
+      "submitted": "Submitted",
+      "resolution": "Resolution",
+      "reportedItems": "What this report is about",
+      "reportedUser": "Reported user",
+      "job": "Job",
+      "assignment": "Work",
+      "review": "Review",
+      "closed": "This report is closed.",
+      "startReview": "Mark as under review",
+      "startReviewConfirm": "Mark this report as under review?",
+      "startReviewYes": "Yes",
+      "resolve": "Resolve",
+      "resolveConfirm": "Resolve this report?",
+      "resolveExplain": "Describe what was done. The reporter will see this note.",
+      "resolveYes": "Resolve report",
+      "dismiss": "Dismiss",
+      "dismissConfirm": "Dismiss this report?",
+      "dismissExplain": "Explain why no action is needed. The reporter will see this note.",
+      "dismissYes": "Dismiss report"
+    },
+    "disputes": {
+      "tab": "Disputes",
+      "empty": "No open disputes.",
+      "flash": {
+        "completed": "Dispute resolved: work counted as completed.",
+        "cancelled": "Dispute resolved: work cancelled."
+      },
+      "confirmedDone": "Confirmed the work is done",
+      "notConfirmed": "Has not confirmed completion",
+      "complete": "Count as completed",
+      "completeConfirm": "Count this work as completed?",
+      "completeExplain": "Both sides are told the work is complete.",
+      "completeYes": "Mark completed",
+      "cancel": "Cancel the work",
+      "cancelConfirm": "Cancel this work?",
+      "cancelExplain": "The work is cancelled and the place on the job is freed.",
+      "cancelYes": "Cancel work"
+    },
+    "reviews": {
+      "title": "Review moderation",
+      "subtitle": "Hide reviews that break the rules. Ratings themselves are never changed.",
+      "filters": {
+        "reported": "Reported",
+        "all": "All reviews",
+        "hidden": "Hidden"
+      },
+      "flash": {
+        "hide": "Review hidden.",
+        "restore": "Review restored."
+      },
+      "empty": "No reviews here.",
+      "stars_one": "{{count}} star",
+      "stars_other": "{{count}} stars",
+      "openReports_one": "{{count}} open report",
+      "openReports_other": "{{count}} open reports",
+      "lastNote": "Last moderation note",
+      "hide": "Hide review",
+      "hideConfirm": "Hide this review?",
+      "hideExplain": "It will not be shown or counted in ratings. The writer is told it was hidden.",
+      "hideYes": "Hide",
+      "restore": "Restore review",
+      "restoreConfirm": "Show this review again?",
+      "restoreYes": "Restore"
+    },
+    "audit": {
+      "title": "Audit log",
+      "subtitle": "Every admin decision, newest first. Entries cannot be edited or deleted.",
+      "filter": "Show",
+      "allTypes": "All decisions",
+      "empty": "No decisions recorded yet.",
+      "types": {
+        "user": "Account",
+        "employer": "Employer",
+        "job": "Job",
+        "report": "Report",
+        "review": "Review",
+        "assignment": "Work"
       }
     }
   }

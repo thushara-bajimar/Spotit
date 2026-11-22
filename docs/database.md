@@ -9,6 +9,7 @@ SQLite, accessed with `better-sqlite3`. The schema lives in `server/src/db/migra
 | `003_application_rules.sql` | Triggers that refuse applications to unavailable jobs and invalid application status changes, plus a listing index |
 | `004_employer_job_rules.sql` | Triggers: only approved employers can insert jobs; allowed job lifecycle transitions |
 | `005_assignment_rules.sql` | Assignment history columns, trigger-maintained `workers_assigned`, automatic open/filled status, assignment transition rules |
+| `006_admin_moderation.sql` | Audit log can also record decisions on assignments (table rebuilt; append-only triggers re-created), report status transition trigger |
 
 Applied migrations are recorded in `schema_migrations`. Each migration runs in a transaction, so a
 failing migration changes nothing. Never edit a migration that has already been shared. Add a new
@@ -168,6 +169,7 @@ The audit log. Columns: `admin_id` (must be an admin), `action` (e.g. `job.rejec
 | `trg_assignments_count_insert` / `trg_assignments_count_cancel` | Keep `jobs.workers_assigned` equal to the number of non-cancelled assignments. Together with the capacity CHECK on `jobs`, this makes overbooking impossible. |
 | `trg_jobs_capacity_status` | Moves a job from `open` to `filled` when it reaches capacity, and back to `open` when a place frees up |
 | `trg_assignments_status_transition` | Allowed changes: `confirmed` to `in_progress`, `completion_pending` or `cancelled`; `in_progress` to `completion_pending`, `cancelled` or `disputed`; `completion_pending` to `completed` or `disputed`; `disputed` to `completed` or `cancelled`. `completed` and `cancelled` are final. |
+| `trg_reports_status_transition` | Allowed changes: `pending` to `under_review`, `resolved` or `dismissed`; `under_review` to `resolved` or `dismissed`. `resolved` and `dismissed` are final. |
 | `trg_applications_status_transition` | Allowed changes: `pending` to `accepted`, `rejected` or `withdrawn`; and `withdrawn` back to `pending`. All others are refused. |
 | `trg_admin_actions_admin_role` | Only admins appear in the audit log |
 | `trg_admin_actions_no_update` / `_no_delete` | The audit log cannot be changed |

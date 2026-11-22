@@ -17,7 +17,7 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 | 3 | Worker module (job browsing, search, filters, job details, applications) | **Done** (profile editing still to come) |
 | 4 | Employer module (profile, dashboard, job posting & management, applicant viewing) | **Done** |
 | 5 | Applications & assignments (accept/reject, capacity, assignments) | **Done** |
-| 6 | Admin (dashboard, approvals, users, moderation, audit log) | Planned |
+| 6 | Admin (dashboard, approvals, users, moderation, audit log) | **Done** |
 | 7 | Trust (completion, payments, ratings, reports) | Planned |
 | 8 | Notifications & full translation review | Planned |
 | 9 | Testing & refinement | Planned |
@@ -31,16 +31,15 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 - Worker marketplace: search, filters, sorting and job details.
 - Applying for jobs, with duplicate and unavailable-job protection.
 - "My applications", including withdrawing an application.
-
 - Employer profile editing and an employer dashboard with live counts.
 - Posting jobs (with a preview step), editing and closing them.
 - Viewing, accepting and rejecting applicants, with protection against overbooking.
 - Assignments for workers and employers: start, confirm completion on both sides, cancel, report a problem.
+- Admin panel: dashboard, employer and job approvals, user suspension, reports, review moderation, disputes and an audit log.
 
 **What does not work yet:**
-- Recording payments and ratings (Phase 7).
-- The admin screens (Phase 6). Until then, approve employers and jobs in the database, for example with
-  `UPDATE employer_profiles SET verification_status = 'approved' WHERE user_id = …`.
+- Recording payments, ratings and submitting reports (Phase 7).
+- Notifications are stored but not shown yet (Phase 8).
 
 ## Tech stack
 

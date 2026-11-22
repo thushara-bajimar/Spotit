@@ -115,11 +115,61 @@ try {
     db.prepare(
       `INSERT INTO worker_profiles (user_id, district, locality, skills) VALUES (?, 'dakshina_kannada', 'Kankanady', '["cleaning","hotel_restaurant"]')`,
     ).run(workerId);
+
+    // --- Samples for the admin panel (reports and reviews arrive in Phase 7) ---
+    // An employer waiting for approval.
+    const pendingEmployer = Number(
+      db.prepare(`INSERT INTO users (full_name, phone, password_hash, role) VALUES ('Ganesh Kamath', '7000000005', ?, 'employer')`)
+        .run(passwordHash).lastInsertRowid,
+    );
+    db.prepare(
+      `INSERT INTO employer_profiles (user_id, employer_type, business_name, district, locality, description)
+       VALUES (?, 'small_business', '[Sample] Kamath Catering', 'udupi', 'Kundapura', 'Sample data for development.')`,
+    ).run(pendingEmployer);
+
+    // A completed piece of work between the demo worker and the hotel, with two reviews.
+    const jobId = db.prepare(`SELECT id FROM jobs WHERE title LIKE '%Hotel room cleaning%'`).pluck().get();
+    const applicationId = Number(
+      db.prepare(`INSERT INTO applications (job_id, worker_id, status, decided_at) VALUES (?, ?, 'pending', NULL)`)
+        .run(jobId, workerId).lastInsertRowid,
+    );
+    db.prepare(`UPDATE applications SET status = 'accepted', decided_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?`).run(applicationId);
+    const assignmentId = Number(
+      db.prepare('INSERT INTO assignments (job_id, worker_id, application_id) VALUES (?, ?, ?)')
+        .run(jobId, workerId, applicationId).lastInsertRowid,
+    );
+    db.prepare(`INSERT INTO payments (assignment_id, agreed_amount, wage_basis) VALUES (?, 650, 'per_day')`).run(assignmentId);
+    db.prepare(`UPDATE assignments SET status = 'completion_pending', worker_confirmed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?`).run(assignmentId);
+    db.prepare(
+      `UPDATE assignments SET status = 'completed', employer_confirmed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'),
+              completed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?`,
+    ).run(assignmentId);
+    const hotel = employerIds.hotel;
+    db.prepare('INSERT INTO reviews (assignment_id, reviewer_id, reviewee_id, rating, comment) VALUES (?, ?, ?, 5, ?)')
+      .run(assignmentId, workerId, hotel, '[Sample] Paid on time and treated us well.');
+    const badReview = Number(
+      db.prepare('INSERT INTO reviews (assignment_id, reviewer_id, reviewee_id, rating, comment) VALUES (?, ?, ?, 1, ?)')
+        .run(assignmentId, hotel, workerId, '[Sample] Useless and lazy, do not hire this person!!').lastInsertRowid,
+    );
+
+    // Reports: one about the insulting review, one about a job.
+    db.prepare(
+      `INSERT INTO reports (reporter_id, category, description, review_id, reported_user_id)
+       VALUES (?, 'harassment', '[Sample] This review insults me. I finished all the rooms on time.', ?, ?)`,
+    ).run(workerId, badReview, hotel);
+    db.prepare(
+      `INSERT INTO reports (reporter_id, category, description, job_id)
+       VALUES (?, 'misleading_job', '[Sample] The sale job says 10 am to 8 pm, but the shop asked us to stay till 10 pm.', ?)`,
+    ).run(workerId, db.prepare(`SELECT id FROM jobs WHERE title LIKE '%Sales helper%'`).pluck().get());
   })();
 
-  console.log(`✓ Sample data created: ${EMPLOYERS.length} approved employers, ${JOBS.length} jobs, 1 demo worker.`);
+  console.log(
+    `✓ Sample data created: ${EMPLOYERS.length} approved employers + 1 waiting for approval, ${JOBS.length} jobs, ` +
+      '1 demo worker, 1 completed assignment with 2 reviews, 2 reports.',
+  );
   console.log(`  Demo worker login: 7000000010 / ${SAMPLE_PASSWORD}`);
-  console.log(`  Sample employers:  7000000001–7000000004 / ${SAMPLE_PASSWORD}`);
+  console.log(`  Sample employers:  7000000001–7000000004 / ${SAMPLE_PASSWORD} (approved)`);
+  console.log(`                     7000000005 / ${SAMPLE_PASSWORD} (waiting for admin approval)`);
 } finally {
   if (db.open) db.close();
 }

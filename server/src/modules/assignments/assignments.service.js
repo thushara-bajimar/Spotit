@@ -164,7 +164,12 @@ function allowedActions(row, role, today) {
   return actions;
 }
 
-const whoDid = (row, userId) => (userId == null ? null : userId === row.worker_id ? 'worker' : 'employer');
+const whoDid = (row, userId) => {
+  if (userId == null) return null;
+  if (userId === row.worker_id) return 'worker';
+  if (userId === row.employer_id) return 'employer';
+  return 'admin'; // e.g. a dispute resolved by an admin
+};
 
 /** Row → assignment view for `role` (each side sees the other's contact). */
 function toAssignment(row, role, today) {

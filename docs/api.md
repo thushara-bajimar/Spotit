@@ -385,6 +385,42 @@ The assignment object contains:
 
 Every action notifies the other party. Allowed status transitions are also enforced by a database trigger.
 
+## Admin panel (Phase 6)
+
+Every route under `/api/admin` requires a signed-in **admin**: no session gets 401, any other role
+gets 403. Admin accounts cannot be registered through the API; they are created only with
+`npm run create-admin`.
+
+Every decision is written to the append-only `admin_actions` audit log in the same transaction as the
+change itself.
+
+| Endpoint | Notes |
+|---|---|
+| `GET /stats` | Counts: workers, employers, pending employers, pending jobs, live jobs, open reports, open disputes, suspended users |
+| `GET /employers?status=pending\|approved\|rejected&q=` · `GET /employers/:id` | The detail view includes recent jobs and decision history |
+| `POST /employers/:id/approve` | From `pending` or `rejected`. The employer can post jobs. |
+| `POST /employers/:id/reject {reason}` | From `pending` or `approved`. The employer can't post jobs, and their jobs are hidden from workers. |
+| `GET /jobs?approval=&q=` · `GET /jobs/:id` | `resubmitted: true` marks a pending job that was edited after an earlier approval |
+| `POST /jobs/:id/approve` | From `pending`, and only while the job is `open` or `filled`. The job appears in the marketplace. |
+| `POST /jobs/:id/reject {reason}` | From `pending` or `approved`. The employer sees the reason. |
+| `GET /users?q=&role=&status=&page=` · `GET /users/:id` | Search covers name, phone and business name. The detail view includes activity counts and the visible rating. |
+| `POST /users/:id/suspend {reason}` | The user is logged out at once and login is refused. Nothing is deleted. Admin accounts can't be suspended. |
+| `POST /users/:id/reactivate {reason?}` | The user can log in again |
+| `GET /reports?status=` · `GET /reports/:id` | Includes the reporter and the reported user, job, assignment or review |
+| `POST /reports/:id/review` | `pending` to `under_review` |
+| `POST /reports/:id/resolve {note}` · `POST /reports/:id/dismiss {note}` | Final. The reporter is notified. |
+| `GET /reviews?status=visible\|hidden&reported=1` | Reported reviews are listed first |
+| `POST /reviews/:id/hide {reason}` · `POST /reviews/:id/restore {reason}` | Hidden reviews don't count towards ratings. Admins can never create or edit ratings. |
+| `GET /disputes` | Lists assignments with status `disputed` |
+| `POST /disputes/:assignmentId/resolve {outcome: completed\|cancelled, note}` | Both parties are notified |
+| `GET /audit-log?targetType=&action=&page=` | Newest first, 30 per page |
+
+**Suspension effects** (checked where each action happens, not only at login):
+- The user's sessions are deleted and login is refused.
+- A suspended employer's jobs are hidden from workers.
+- A suspended worker can't be accepted for a job.
+- All applications, assignments, jobs, reviews and reports are kept.
+
 ## Role-protected endpoints
 
 Every route under these paths checks the role on the server.
