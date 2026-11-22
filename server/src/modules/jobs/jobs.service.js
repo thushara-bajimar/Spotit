@@ -24,7 +24,7 @@ const AVAILABLE_SQL = `
 
 // Columns shared by job cards and job details. Only worker-appropriate
 // employer fields are selected (no phone, no personal address).
-const JOB_COLUMNS = `
+export const JOB_COLUMNS = `
   j.id, j.title, j.district, j.locality, j.start_date, j.end_date, j.start_time, j.end_time,
   j.duration_type, j.wage_amount, j.wage_basis, j.workers_required, j.workers_assigned,
   j.approval_status, j.status, j.created_at, j.reviewed_at,
@@ -32,7 +32,7 @@ const JOB_COLUMNS = `
   u.full_name AS employer_full_name, u.account_status AS employer_account_status, u.created_at AS employer_since,
   ep.employer_type, ep.business_name, ep.verification_status AS employer_verification`;
 
-const JOB_JOINS = `
+export const JOB_JOINS = `
   FROM jobs j
   JOIN job_categories c ON c.id = j.category_id
   JOIN users u ON u.id = j.employer_id

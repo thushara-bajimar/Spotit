@@ -14,9 +14,16 @@ import { JobsPage } from '../pages/worker/JobsPage.jsx';
 import { JobDetailsPage } from '../pages/worker/JobDetailsPage.jsx';
 import { MyWorkPage } from '../pages/worker/MyWorkPage.jsx';
 import { WorkerProfilePage } from '../pages/worker/WorkerProfilePage.jsx';
+import { EmployerHomePage } from '../pages/employer/EmployerHomePage.jsx';
+import { MyJobsPage } from '../pages/employer/MyJobsPage.jsx';
+import { EmployerJobPage } from '../pages/employer/EmployerJobPage.jsx';
+import { EditJobPage } from '../pages/employer/EditJobPage.jsx';
+import { PostJobPage } from '../pages/employer/PostJobPage.jsx';
+import { ApplicantsPage } from '../pages/employer/ApplicantsPage.jsx';
+import { EmployerProfilePage } from '../pages/employer/EmployerProfilePage.jsx';
 import { PlaceholderPage } from '../pages/dashboard/PlaceholderPage.jsx';
 import { NotFoundPage } from '../pages/NotFoundPage.jsx';
-import { adminNav, employerNav, employerNotifications, workerNav } from './navigation.js';
+import { adminNav, employerNotifications, workerNav } from './navigation.js';
 
 /** Builds child routes for a role area from its navigation list. */
 function placeholderRoutes(items) {
@@ -86,7 +93,17 @@ export const router = createBrowserRouter([
           {
             path: 'employer',
             element: <EmployerLayout />,
-            children: placeholderRoutes([...employerNav, employerNotifications]),
+            children: [
+              { index: true, element: <EmployerHomePage /> },
+              { path: 'jobs', element: <MyJobsPage /> },
+              { path: 'jobs/:jobId', element: <EmployerJobPage /> },
+              { path: 'jobs/:jobId/edit', element: <EditJobPage /> },
+              { path: 'post-job', element: <PostJobPage /> },
+              { path: 'applicants', element: <ApplicantsPage /> },
+              { path: 'profile', element: <EmployerProfilePage /> },
+              // Still planned (see navigation.js for the phase).
+              ...placeholderRoutes([employerNotifications]),
+            ],
           },
         ],
       },

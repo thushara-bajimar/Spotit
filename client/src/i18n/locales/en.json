@@ -236,7 +236,10 @@
     "JOB_UNAVAILABLE": "This job is not accepting applications.",
     "ALREADY_APPLIED": "You have already applied for this job.",
     "APPLICATION_NOT_FOUND": "Application not found.",
-    "CANNOT_WITHDRAW": "Only pending applications can be withdrawn."
+    "CANNOT_WITHDRAW": "Only pending applications can be withdrawn.",
+    "EMPLOYER_NOT_APPROVED": "Your employer account must be approved before you can post jobs.",
+    "JOB_NOT_EDITABLE": "This job can no longer be edited.",
+    "JOB_NOT_CLOSABLE": "This job cannot be closed."
   },
   "notFound": {
     "title": "Page not found",
@@ -265,7 +268,15 @@
     "password_too_long": "Password is too long.",
     "too_small": "This value is too small.",
     "too_large": "This value is too large.",
-    "invalid_date": "Enter a valid date."
+    "invalid_date": "Enter a valid date.",
+    "date_in_past": "This date has already passed.",
+    "too_far_ahead": "Choose a date within the next 6 months.",
+    "end_date_required": "Choose an end date.",
+    "end_before_start": "The end date must be after the start date.",
+    "too_long_period": "The work period can be at most 6 months.",
+    "same_time": "The end time must be different from the start time.",
+    "invalid_time": "Enter a valid time.",
+    "below_assigned": "You already have more workers confirmed than this."
   },
   "jobs": {
     "title": "Find work",
@@ -402,5 +413,170 @@
     "skills": "Work I can do",
     "noSkills": "No types of work selected yet.",
     "editingLater": "Profile editing will be available in a later update."
+  },
+  "employer": {
+    "jobStatus": {
+      "pending_approval": "Waiting for approval",
+      "rejected": "Not approved",
+      "live": "Live",
+      "filled": "Filled",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "closed": "Closed",
+      "cancelled": "Cancelled",
+      "expired": "Expired",
+      "draft": "Draft"
+    },
+    "jobStatusHelp": {
+      "pending_approval": "Our team is reviewing this job. Workers will see it once it is approved.",
+      "rejected": "This job was not approved. Edit it to fix the problem and send it for review again.",
+      "live": "Workers can see this job and apply.",
+      "filled": "All places are filled. Workers can no longer apply.",
+      "in_progress": "The work is in progress.",
+      "completed": "This work is completed.",
+      "closed": "You closed this job. Workers can no longer apply.",
+      "cancelled": "This job was cancelled.",
+      "expired": "The dates of this job have passed.",
+      "draft": "This job is not published."
+    },
+    "dashboard": {
+      "loadError": "We couldn't load your dashboard.",
+      "statsLabel": "Your jobs at a glance",
+      "stats": {
+        "totalJobs": "Jobs posted",
+        "pendingApproval": "Waiting for approval",
+        "live": "Live",
+        "filled": "Filled",
+        "ended": "Closed or ended",
+        "pendingApplicants": "New applicants"
+      },
+      "recentJobs": "Recent jobs"
+    },
+    "jobs": {
+      "title": "My jobs",
+      "subtitle": "All the jobs you have posted.",
+      "loadError": "We couldn't load your jobs.",
+      "empty": "You haven't posted any jobs yet.",
+      "emptyFiltered": "No jobs in this group.",
+      "emptyHint": "Post your first job — our team reviews it before workers can see it.",
+      "groups": {
+        "all": "All",
+        "pending": "Waiting for approval",
+        "live": "Live",
+        "rejected": "Not approved",
+        "filled": "Filled",
+        "ended": "Closed / ended"
+      },
+      "workersSummary": "{{assigned}} of {{required}} workers confirmed",
+      "applicantsSummary_one": "{{count}} applicant · {{pending}} new",
+      "applicantsSummary_other": "{{count}} applicants · {{pending}} new"
+    },
+    "postJob": {
+      "cta": "Post a job",
+      "title": "Post a job",
+      "subtitle": "Describe the work clearly. Our team reviews every job before workers can see it.",
+      "submit": "Submit for approval",
+      "notApprovedTitle": "Your account is waiting for approval",
+      "notApprovedText": "You can post jobs once an admin approves your employer account. This usually happens soon after registration.",
+      "rejectedText": "Your employer account was not approved. Check the reason on your profile, update your details and they will be reviewed again.",
+      "notApprovedShort": "You can post jobs once your account is approved.",
+      "viewProfile": "View my profile"
+    },
+    "form": {
+      "sectionWork": "About the work",
+      "title": "Job title",
+      "titleHint": "Short and clear, e.g. \"Kitchen helper for wedding lunch\".",
+      "category": "Type of work",
+      "description": "Description",
+      "descriptionHint": "What will the worker do? Mention anything they should know.",
+      "requirements": "Requirements",
+      "requirementsHint": "Experience, clothing, tools to bring, language, etc.",
+      "sectionPlace": "Where",
+      "address": "Exact address",
+      "addressHint": "Shared only with workers you accept.",
+      "addressPrivate": "shared only with accepted workers",
+      "sectionWhen": "When",
+      "duration": "How long is the work?",
+      "durationHint": "Choose \"Multiple days\" or \"Short-term\" for work spread over several days.",
+      "workDate": "Work date",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "startTime": "Starts at",
+      "endTime": "Ends at",
+      "timeHint": "Daily working hours. Night shifts may end the next morning.",
+      "sectionPay": "Pay and workers",
+      "wageAmount": "Wage (₹)",
+      "wageBasis": "Paid",
+      "workersRequired": "Number of workers needed",
+      "preview": "Preview job",
+      "previewNote": "This is how workers will see your job. Check the details, then submit it for approval.",
+      "backToEdit": "Back to edit",
+      "submitting": "Submitting…"
+    },
+    "job": {
+      "back": "Back to my jobs",
+      "actions": "Manage this job",
+      "edit": "Edit job",
+      "close": "Close job",
+      "closeConfirm": "Close this job?",
+      "closeExplain": "Workers will no longer be able to apply. This cannot be undone.",
+      "closeReason": "Reason",
+      "closeYes": "Yes, close job",
+      "noActions": "This job can no longer be changed.",
+      "rejectionReason": "Reason",
+      "flash": {
+        "created": "Job submitted! It will be visible to workers once our team approves it.",
+        "updated": "Changes saved.",
+        "resubmitted": "Changes saved. The job has been sent for review again and is hidden from workers until it is approved.",
+        "unchanged": "No changes were made.",
+        "closed": "The job has been closed."
+      }
+    },
+    "edit": {
+      "title": "Edit job",
+      "back": "Back to job",
+      "notEditable": "This job can no longer be edited.",
+      "submit": "Save and submit for review",
+      "submitApproved": "Save changes",
+      "reviewWarning": "This job is live. Changing anything other than the number of workers sends it back for admin review, and it will be hidden from workers until approved.",
+      "resubmitNote": "This job was not approved (reason: {{reason}}). Saving your changes sends it for review again."
+    },
+    "applicants": {
+      "title": "Applicants",
+      "subtitle": "Workers who applied to your jobs.",
+      "filterJob": "Job",
+      "allJobs": "All jobs",
+      "filterStatus": "Status",
+      "forJob": "For:",
+      "empty": "No applicants yet.",
+      "emptyForJob": "No one has applied to this job yet.",
+      "loadError": "We couldn't load applicants.",
+      "viewOnlyNote": "Accepting and rejecting applicants will be available soon. Phone numbers are shared after you accept a worker."
+    },
+    "profile": {
+      "edit": "Edit profile",
+      "save": "Save profile",
+      "saving": "Saving…",
+      "description": "About your business or household",
+      "descriptionHint": "A few words that help workers trust you.",
+      "verification": "Account approval",
+      "submittedOn": "Submitted for review on {{date}}",
+      "status": {
+        "approved": "Approved",
+        "pending": "Waiting for approval",
+        "rejected": "Not approved"
+      },
+      "statusHelp": {
+        "approved": "Your account is approved. You can post jobs.",
+        "pending": "Our team is reviewing your account. You can post jobs once it is approved.",
+        "rejected": "Your account was not approved. Update your details to send them for review again."
+      },
+      "reviewWarning": "Changing your employer type or business name sends your account back for review. Your jobs will be hidden from workers until it is approved again.",
+      "resubmitNote": "Saving your changes will send your account for review again.",
+      "flash": {
+        "saved": "Profile saved.",
+        "resubmitted": "Profile saved and sent for review. You can post jobs again once it is approved."
+      }
+    }
   }
 }

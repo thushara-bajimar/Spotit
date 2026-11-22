@@ -55,8 +55,10 @@ describe('GET /api/worker/jobs (marketplace)', () => {
       title: 'Ongoing multi-day', durationType: 'multiple_days',
       startDate: daysFromToday(-2), endDate: daysFromToday(3),
     });
-    const pendingEmployer = insertEmployer(db, { verificationStatus: 'pending' });
-    insertJob(db, pendingEmployer, { title: 'Unapproved employer' });
+    // An employer sent back to review keeps their jobs, but they are hidden.
+    const reReviewedEmployer = insertEmployer(db);
+    insertJob(db, reReviewedEmployer, { title: 'Employer under review' });
+    db.prepare(`UPDATE employer_profiles SET verification_status = 'pending' WHERE user_id = ?`).run(reReviewedEmployer);
 
     const res = await (await workerAgent()).get('/api/worker/jobs');
 

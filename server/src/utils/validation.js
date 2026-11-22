@@ -73,6 +73,15 @@ export function isoDate({ required = false } = {}) {
   };
 }
 
+/** 24-hour clock time 'HH:MM'. */
+export function clockTime({ required = true } = {}) {
+  return (raw) => {
+    if (isMissing(raw)) return required ? { error: 'required' } : { value: null };
+    if (typeof raw !== 'string' || !/^([01]\d|2[0-3]):[0-5]\d$/.test(raw)) return { error: 'invalid_time' };
+    return { value: raw };
+  };
+}
+
 /**
  * Indian mobile number. Accepts common formats (spaces, dashes, +91, 0
  * prefix) and normalises to 10 digits starting with 6–9.

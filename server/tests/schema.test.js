@@ -4,7 +4,7 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { openDatabase } from '../src/db/connection.js';
 import { MIGRATIONS_DIR, runMigrations } from '../src/db/migrator.js';
-import { createTestDb, insertJob, insertUser } from './helpers.js';
+import { createTestDb, insertEmployer, insertJob, insertUser } from './helpers.js';
 
 const EXPECTED_TABLES = [
   'admin_actions', 'applications', 'assignments', 'employer_profiles', 'job_categories', 'jobs',
@@ -70,11 +70,11 @@ describe('users constraints', () => {
 describe('role integrity triggers', () => {
   it('only lets employers own jobs', () => {
     const worker = insertUser(db, 'worker');
-    expect(() => insertJob(db, worker)).toThrow(/must reference an employer/);
+    expect(() => insertJob(db, worker)).toThrow(/must reference an employer|not approved to post jobs/);
   });
 
   it('only lets workers apply', () => {
-    const employer = insertUser(db, 'employer');
+    const employer = insertEmployer(db);
     const jobId = insertJob(db, employer);
     expect(() =>
       db.prepare('INSERT INTO applications (job_id, worker_id) VALUES (?, ?)').run(jobId, employer),
@@ -82,7 +82,7 @@ describe('role integrity triggers', () => {
   });
 
   it('matches profiles to roles', () => {
-    const employer = insertUser(db, 'employer');
+    const employer = insertEmployer(db);
     expect(() => db.prepare('INSERT INTO worker_profiles (user_id) VALUES (?)').run(employer)).toThrow(
       /must reference a worker/,
     );
@@ -95,7 +95,7 @@ describe('jobs constraints', () => {
   });
 
   it('never allows more workers assigned than required (overbooking guard)', () => {
-    const employer = insertUser(db, 'employer');
+    const employer = insertEmployer(db);
     const jobId = insertJob(db, employer, { workersRequired: 2 });
     const assign = db.prepare('UPDATE jobs SET workers_assigned = ? WHERE id = ?');
 
@@ -104,7 +104,7 @@ describe('jobs constraints', () => {
   });
 
   it('validates dates, times, wage and duration consistency', () => {
-    const employer = insertUser(db, 'employer');
+    const employer = insertEmployer(db);
     expect(() => insertJob(db, employer, { startDate: '2026-02-30' })).toThrow(/CHECK/);
     expect(() => insertJob(db, employer, { startTime: '25:00' })).toThrow(/CHECK/);
     expect(() => insertJob(db, employer, { wageAmount: 0 })).toThrow(/CHECK/);
@@ -119,7 +119,7 @@ describe('jobs constraints', () => {
   });
 
   it('requires a reason when a job is rejected', () => {
-    const employer = insertUser(db, 'employer');
+    const employer = insertEmployer(db);
     const jobId = insertJob(db, employer);
     expect(() => db.prepare(`UPDATE jobs SET approval_status = 'rejected' WHERE id = ?`).run(jobId)).toThrow(
       /CHECK/,
@@ -129,7 +129,7 @@ describe('jobs constraints', () => {
 
 describe('applications, assignments and reviews', () => {
   function setUpAcceptedApplication() {
-    const employer = insertUser(db, 'employer');
+    const employer = insertEmployer(db);
     const worker = insertUser(db, 'worker');
     const jobId = insertJob(db, employer);
     const applicationId = Number(

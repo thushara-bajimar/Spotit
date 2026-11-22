@@ -203,6 +203,107 @@ Errors:
 - 409 `CANNOT_WITHDRAW` for any other status. `details.status` gives the current status.
 - 404 `APPLICATION_NOT_FOUND` when the application belongs to someone else or does not exist.
 
+## Employer module (Phase 4)
+
+All of these require a signed-in **employer**: no session gets 401, any other role gets 403. Jobs and
+applicants are always limited to the employer's own jobs. Another employer's job returns 404
+`JOB_NOT_FOUND`.
+
+### `GET /api/employer/profile` · `PUT /api/employer/profile`
+`PUT` body: `{ fullName, employerType, businessName?, district, locality, address?, description? }`.
+`businessName` is required unless the type is `individual` or `household`.
+
+**200** → `{ profile, reviewRequired }`
+
+`reviewRequired` is `true` when the save sends the account back to `verification_status = 'pending'`.
+That happens in two cases:
+- An **approved** employer changes their employer type or business name.
+- A **rejected** employer edits their profile, which re-submits it.
+
+While pending, the employer's jobs are hidden from workers and they cannot post new jobs.
+
+### `GET /api/employer/dashboard`
+**200** →
+```json
+{ "stats": { "totalJobs", "pendingApproval", "live", "rejected", "filled", "ended", "pendingApplicants" },
+  "recentJobs": [EmployerJob] }
+```
+
+All counts come straight from the database.
+
+### `GET /api/employer/jobs?group=`
+`group` is optional:
+
+| Value | Meaning |
+|---|---|
+| `pending` | Open and waiting for admin approval |
+| `live` | Approved and open |
+| `rejected` | Not approved |
+| `filled` | `filled` or `in_progress` |
+| `ended` | `closed`, `cancelled`, `expired` or `completed` |
+
+**200** → `{ jobs: [EmployerJob] }`. Each `EmployerJob` contains:
+- the `JobSummary` fields without `employer`
+- `workersAssigned`, `approvalStatus`, `rejectionReason`, `statusReason`
+- `applicants { total, pending }`, `createdAt`, `updatedAt`
+- `canEdit`, `canClose`
+
+### `POST /api/employer/jobs`
+Only for **approved** employers. Others get 403 `EMPLOYER_NOT_APPROVED`, with `details.verificationStatus`.
+
+Body:
+```json
+{ "title", "category", "description", "district", "locality", "address"?, "startDate", "endDate"?,
+  "startTime", "endTime", "durationType", "wageAmount", "wageBasis", "workersRequired", "requirements"? }
+```
+
+Validation rules:
+- `startDate` must be today or later, and at most 180 days ahead.
+- `few_hours` and `one_day` jobs: any `endDate` is ignored.
+- `multiple_days` and `short_term` jobs: `endDate` is required, must be after `startDate`, and the period
+  can be at most 180 days.
+- `endTime` must differ from `startTime`. A night shift may end "earlier" than it starts.
+- Field error codes: `date_in_past`, `too_far_ahead`, `end_date_required`, `end_before_start`,
+  `too_long_period`, `same_time`, `invalid_time`.
+
+**201** → `{ job }`, created with `approvalStatus: "pending"`. It is not visible to workers until an admin
+approves it.
+
+### `GET /api/employer/jobs/:jobId`
+**200** → `{ job }`: an `EmployerJob` plus `description`, `requirements` and `address`.
+
+### `PUT /api/employer/jobs/:jobId`
+The body is the same as for creating a job. Only `open` jobs can be edited; any other status gets
+409 `JOB_NOT_EDITABLE`.
+
+Rules:
+- `workersRequired` cannot go below the number of workers already assigned (field code `below_assigned`).
+- On an **approved** job, changing anything except `workersRequired` sets `approvalStatus` back to
+  `pending`. The job is then hidden from workers until it is re-approved.
+- Editing a pending or rejected job (re-)submits it as `pending`.
+- Workers with pending or accepted applications get a `job_updated` notification.
+
+**200** → `{ job, reviewRequired, changedFields }`
+
+### `POST /api/employer/jobs/:jobId/close`
+Body: `{ "reason"?: string }`. Closes an `open` or `filled` job, so workers can no longer apply. Any other
+status gets 409 `JOB_NOT_CLOSABLE`.
+
+Workers with pending or accepted applications get a `job_closed` notification.
+
+**200** → `{ job }`
+
+### `GET /api/employer/applicants?jobId=&status=`
+Lists applicants to the employer's own jobs. Pending applicants come first.
+
+Each item contains:
+- `id`, `status`, `message`, `appliedAt`, `decidedAt`
+- `job { id, title, status, approvalStatus }`
+- `worker { id, name, district, locality, skills, memberSince }`
+
+The worker's phone number is **not** included; it is shared only after acceptance (Phase 5). This phase
+is view-only: accepting and rejecting arrive in Phase 5.
+
 ## Role-protected endpoints
 
 Every route under these paths checks the role on the server.
@@ -210,7 +311,6 @@ Every route under these paths checks the role on the server.
 | Endpoint | Role | Returns |
 |---|---|---|
 | `GET /api/worker/profile` | worker | `{ profile: { district, locality, skills, bio } }` |
-| `GET /api/employer/profile` | employer | `{ profile: { employerType, businessName, district, locality, address, verificationStatus, rejectionReason, submittedAt, reviewedAt } }` |
 | `GET /api/admin/stats` | admin | `{ stats: { workers, employers, pendingEmployers, pendingJobs, activeJobs, openReports } }` |
 
 Responses:

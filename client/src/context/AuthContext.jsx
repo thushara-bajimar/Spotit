@@ -95,9 +95,16 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  /** Re-reads the current user (e.g. after a profile change affects approval status). */
+  const refreshUser = useCallback(async () => {
+    const user = await fetchCurrentUser();
+    applyUser(user);
+    return user;
+  }, [applyUser]);
+
   const value = useMemo(
-    () => ({ ...state, login, registerWorker, registerEmployer, logout }),
-    [state, login, registerWorker, registerEmployer, logout],
+    () => ({ ...state, login, registerWorker, registerEmployer, logout, refreshUser }),
+    [state, login, registerWorker, registerEmployer, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

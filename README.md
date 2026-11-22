@@ -15,7 +15,7 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 | 1 | Foundation: structure, database schema, design system, layouts, routing, i18n, docs | **Done** |
 | 2 | Authentication (register, login, logout, roles, sessions) | **Done** |
 | 3 | Worker module (job browsing, search, filters, job details, applications) | **Done** (profile editing still to come) |
-| 4 | Employer module (onboarding, approval, job creation & management) | Planned |
+| 4 | Employer module (profile, dashboard, job posting & management, applicant viewing) | **Done** |
 | 5 | Applications & assignments (accept/reject, capacity, assignments) | Planned |
 | 6 | Admin (dashboard, approvals, users, moderation, audit log) | Planned |
 | 7 | Trust (completion, payments, ratings, reports) | Planned |
@@ -32,8 +32,14 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 - Applying for jobs, with duplicate and unavailable-job protection.
 - "My applications", including withdrawing an application.
 
-**What does not work yet:** the employer and admin features (for example, posting jobs and approving
-employers). Those sections are marked *Planned · Phase N*.
+- Employer profile editing and an employer dashboard with live counts.
+- Posting jobs (with a preview step), editing and closing them.
+- Viewing applicants.
+
+**What does not work yet:**
+- Accepting or rejecting applicants (Phase 5).
+- The admin screens (Phase 6). Until then, approve employers and jobs in the database, for example with
+  `UPDATE employer_profiles SET verification_status = 'approved' WHERE user_id = …`.
 
 ## Tech stack
 
