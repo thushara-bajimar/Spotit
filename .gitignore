@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+coverage/
+
+# Environment files (keep the .env.example templates)
+.env
+.env.*
+!.env.example
+
+# SQLite databases
+server/data/
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/

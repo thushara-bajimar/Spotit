@@ -1,0 +1,133 @@
+# SpotIt
+
+**Local work. Fair opportunities.** (ಸ್ಥಳೀಯ ಕೆಲಸ. ನ್ಯಾಯಯುತ ಅವಕಾಶಗಳು.)
+
+SpotIt is a bilingual (English / ಕನ್ನಡ) web platform that connects local employers — households, shops,
+hotels, hospitals and institutions — with people looking for daily-wage, part-time and short-term work.
+
+> "SpotIt" is a working name. To rename the product, edit `client/src/config/brand.js` and the
+> `<title>` in `client/index.html`.
+
+## Project status
+
+| Phase | Scope | Status |
+|---|---|---|
+| 1 | Foundation: structure, database schema, design system, layouts, routing, i18n, docs | **Done** |
+| 2 | Authentication (register, login, logout, roles, sessions) | Planned |
+| 3 | Worker module (profile, job browsing, search, filters, applications) | Planned |
+| 4 | Employer module (onboarding, approval, job creation & management) | Planned |
+| 5 | Applications & assignments (accept/reject, capacity, assignments) | Planned |
+| 6 | Admin (dashboard, approvals, users, moderation, audit log) | Planned |
+| 7 | Trust (completion, payments, ratings, reports) | Planned |
+| 8 | Notifications & full translation review | Planned |
+| 9 | Testing & refinement | Planned |
+
+**What works in Phase 1:** the landing page (job categories load from the real database), language switching,
+all layouts and routes, the health-check API and the full database schema.
+**What does not work yet:** login, registration, job search and every dashboard feature. These screens are
+clearly marked *Preview* or *Planned · Phase N*. The dashboard routes are **not protected** yet.
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React 19, Vite, Tailwind CSS v4, React Router, i18next |
+| Backend | Node.js, Express 5 (REST API) |
+| Database | SQLite via `better-sqlite3` |
+| Tests | Vitest, Supertest |
+
+## Requirements
+
+- **Node.js 22.12 or newer** (developed on Node 24) and npm.
+- No separate database server is needed — SQLite is a file inside `server/data/`.
+
+## Getting started
+
+Run these from the project root (the folder containing this README):
+
+```bash
+# 1. Install all dependencies (client + server, via npm workspaces)
+npm install
+
+# 2. (Optional) create the server env file — defaults work without it
+cp server/.env.example server/.env
+
+# 3. Start the API and the web app together
+npm run dev
+```
+
+Then open **http://localhost:5173**.
+
+- The API runs on http://localhost:4000 (health check: http://localhost:4000/api/health).
+- The Vite dev server forwards every `/api/...` request to the API, so the browser only talks to port 5173.
+- The database file `server/data/spotit.db` is created automatically, and migrations run on server start.
+
+> **Note on npm install scripts:** recent npm versions may print a warning that `better-sqlite3`'s install
+> script was not run. That is fine on Windows/macOS/Linux x64 and arm64: the package ships prebuilt binaries
+> and works without the script. Only if you see an error loading `better_sqlite3.node` run
+> `npm approve-scripts better-sqlite3` followed by `npm rebuild better-sqlite3`.
+
+## Commands
+
+All commands run from the project root.
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Starts API (port 4000, auto-restart on change) and web app (port 5173) together |
+| `npm run dev:server` | Starts only the API |
+| `npm run dev:client` | Starts only the web app |
+| `npm test` | Runs server tests, then client tests |
+| `npm run build` | Builds the web app into `client/dist/` |
+| `npm run start` | Starts the API without file watching |
+| `npm run db:migrate` | Applies pending database migrations |
+
+To start over with an empty database, stop the server and delete the `server/data/` folder.
+
+## Folder structure
+
+```
+Spotit/
+├── client/                    React web app
+│   ├── public/                static files (favicon)
+│   └── src/
+│       ├── components/
+│       │   ├── ui/            reusable building blocks (Button, Input, Card, Badge, Notice, StateView…)
+│       │   ├── common/        app-wide pieces (Logo, LanguageToggle, CategoryIcon, TrustPoints)
+│       │   ├── navigation/    SideNav, BottomNav, MobileDrawer
+│       │   └── landing/       landing page sections
+│       ├── config/            brand name
+│       ├── data/              TEMPORARY sample content (clearly labelled)
+│       ├── hooks/             useApiData
+│       ├── i18n/              i18next setup + locales/en.json, locales/kn.json
+│       ├── layouts/           Root, Public, Auth, Dashboard (+ worker/employer/admin wrappers)
+│       ├── pages/             route pages
+│       ├── routes/            router + navigation config
+│       ├── services/          API client and per-resource services
+│       ├── styles/            Tailwind entry + design tokens
+│       └── utils/             helpers (formatting, class names)
+├── server/                    Express API
+│   ├── scripts/               CLI scripts (migrate)
+│   ├── src/
+│   │   ├── config/            environment configuration
+│   │   ├── db/                connection, migration runner, migrations/*.sql
+│   │   ├── middleware/        error handling, request logging
+│   │   ├── modules/           feature modules (health, categories; more per phase)
+│   │   ├── routes/            mounts modules under /api
+│   │   ├── utils/             HttpError
+│   │   ├── app.js             builds the Express app
+│   │   └── server.js          starts the HTTP server
+│   └── tests/                 API and schema tests
+└── docs/                      architecture, database and API documentation
+```
+
+## Documentation
+
+- [docs/architecture.md](docs/architecture.md) — how the pieces fit together and why
+- [docs/database.md](docs/database.md) — tables, relationships and integrity rules
+- [docs/api.md](docs/api.md) — API endpoints and error format
+
+## Languages
+
+All interface text lives in `client/src/i18n/locales/en.json` and `kn.json`. A test checks that both
+files have the same keys and variables. Kannada text was written during development and **should be
+reviewed by a native speaker** before launch.

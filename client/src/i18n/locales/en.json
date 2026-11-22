@@ -1,0 +1,199 @@
+{
+  "brand": {
+    "tagline": "Local work. Fair opportunities.",
+    "home": "{{appName}} home"
+  },
+  "common": {
+    "login": "Log in",
+    "register": "Register",
+    "retry": "Try again",
+    "loading": "Loading…",
+    "backToHome": "Back to home",
+    "language": "Language",
+    "preview": "Preview",
+    "sample": "Sample",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "mainNavigation": "Main navigation",
+    "notifications": "Notifications",
+    "skipToContent": "Skip to main content"
+  },
+  "language": {
+    "en": "English",
+    "kn": "ಕನ್ನಡ"
+  },
+  "roles": {
+    "worker": "Worker",
+    "employer": "Employer",
+    "admin": "Admin"
+  },
+  "nav": {
+    "worker": {
+      "home": "Home",
+      "jobs": "Jobs",
+      "myWork": "My Work",
+      "notifications": "Notifications",
+      "profile": "Profile"
+    },
+    "employer": {
+      "home": "Home",
+      "myJobs": "My Jobs",
+      "postJob": "Post Job",
+      "applicants": "Applicants",
+      "profile": "Profile",
+      "notifications": "Notifications"
+    },
+    "admin": {
+      "dashboard": "Dashboard",
+      "employerApprovals": "Employer approvals",
+      "jobApprovals": "Job approvals",
+      "workers": "Workers",
+      "employers": "Employers",
+      "reports": "Reports",
+      "reviews": "Review moderation",
+      "auditLog": "Audit log"
+    }
+  },
+  "landing": {
+    "header": {
+      "howItWorks": "How it works",
+      "forEmployers": "For employers"
+    },
+    "hero": {
+      "title": "Find local work.",
+      "titleAccent": "Hire trusted help.",
+      "subtitle": "{{appName}} connects people looking for daily-wage and part-time work with homes, shops, hotels and institutions nearby — and shows the wage upfront."
+    },
+    "search": {
+      "label": "Search for work",
+      "whatLabel": "What work?",
+      "whatPlaceholder": "e.g. cleaning, cooking, watchman",
+      "whereLabel": "Where?",
+      "wherePlaceholder": "Town or locality",
+      "submit": "Search jobs",
+      "previewNote": "Job search is coming in an upcoming update."
+    },
+    "trust": {
+      "reviewed": "Employers are reviewed before they can post",
+      "wages": "Wages shown upfront — per hour, day or task",
+      "languages": "Use it in Kannada or English"
+    },
+    "sample": {
+      "badge": "Sample listing",
+      "caption": "This is how a job will look",
+      "title": "Kitchen helper for a wedding",
+      "category": "Event helper",
+      "locality": "Kankanady, Mangaluru",
+      "employer": "Hotel employer · reviewed",
+      "spotsLeft": "{{left}} of {{total}} spots left"
+    },
+    "categories": {
+      "title": "Work you can find here",
+      "subtitle": "From one-day event help to regular housekeeping — choose the kind of work that suits you.",
+      "error": "We couldn't load categories right now.",
+      "empty": "No categories yet."
+    },
+    "how": {
+      "title": "How it works",
+      "subtitle": "Simple steps, whether you are looking for work or need help.",
+      "workers": {
+        "title": "For workers",
+        "step1Title": "Create your profile",
+        "step1Text": "Sign up with your phone number and add the work you can do.",
+        "step2Title": "Find work nearby",
+        "step2Text": "Browse jobs by area, category and wage. Apply in one tap.",
+        "step3Title": "Work and get paid",
+        "step3Text": "Confirm when the work is done, record your payment and rate the employer."
+      },
+      "employers": {
+        "title": "For employers",
+        "step1Title": "Register and get reviewed",
+        "step1Text": "Tell us about your home, shop or organisation. Our team reviews every employer.",
+        "step2Title": "Post a job",
+        "step2Text": "Share the work, timings and wage clearly. Every job is checked before it goes live.",
+        "step3Title": "Choose workers",
+        "step3Text": "Accept applicants, confirm completed work and rate your workers."
+      }
+    },
+    "cta": {
+      "worker": {
+        "title": "Looking for work?",
+        "text": "Daily-wage, part-time and short-term jobs from homes, shops, hotels and institutions near you.",
+        "action": "Register as a worker"
+      },
+      "employer": {
+        "title": "Need a helping hand?",
+        "text": "Find reliable local workers for a few hours, a day or a few weeks.",
+        "action": "Register as an employer"
+      }
+    },
+    "footer": {
+      "getStarted": "Get started",
+      "safetyTitle": "Stay safe",
+      "safety1": "Never pay anyone to get a job.",
+      "safety2": "{{appName}} records wage payments but does not process or guarantee them.",
+      "safety3": "Report anything suspicious — our team reviews every report.",
+      "rights": "© {{year}} {{appName}}. A community project."
+    }
+  },
+  "auth": {
+    "layout": {
+      "title": "Work close to home. Help you can trust."
+    },
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Log in with your mobile number.",
+      "phone": "Mobile number",
+      "phoneHint": "10-digit number, without +91",
+      "password": "Password",
+      "submit": "Log in",
+      "noAccount": "New to {{appName}}?",
+      "registerLink": "Create an account",
+      "notice": "Logging in will be available soon. This screen is a preview."
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "Tell us how you want to use {{appName}}.",
+      "roleLegend": "I want to…",
+      "workerTitle": "Find work",
+      "workerText": "I am looking for daily-wage or part-time jobs.",
+      "employerTitle": "Hire workers",
+      "employerText": "I need help for my home, shop or organisation.",
+      "continue": "Continue",
+      "haveAccount": "Already have an account?",
+      "loginLink": "Log in",
+      "notice": "Registration will be available soon. This screen is a preview."
+    }
+  },
+  "dashboard": {
+    "previewBanner": "Layout preview — sign-in and access control are added in the next phase. Nothing here is live yet.",
+    "roleArea": "{{role}} area",
+    "placeholderBody": "This section is planned and will be built in a later phase.",
+    "placeholderPhase": "Planned · Phase {{phase}}"
+  },
+  "wage": {
+    "basis": {
+      "per_hour": "/ hour",
+      "per_day": "/ day",
+      "per_week": "/ week",
+      "per_task": "/ task"
+    }
+  },
+  "duration": {
+    "few_hours": "Few hours",
+    "one_day": "One day",
+    "multiple_days": "Multiple days",
+    "short_term": "Short-term"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "NETWORK_ERROR": "Could not reach the server. Check your connection and try again.",
+    "NOT_FOUND": "Not found.",
+    "INTERNAL_ERROR": "Something went wrong on our side."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "text": "The page you are looking for does not exist or has moved.",
+    "action": "Go to home"
+  }
+}
