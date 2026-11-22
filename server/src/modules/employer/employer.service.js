@@ -92,11 +92,16 @@ export function assertApproved(db, employerId) {
 
 const APPLICANT_COUNTS = `
   (SELECT COUNT(*) FROM applications a WHERE a.job_id = j.id AND a.status <> 'withdrawn') AS applicant_count,
-  (SELECT COUNT(*) FROM applications a WHERE a.job_id = j.id AND a.status = 'pending') AS pending_applicant_count`;
+  (SELECT COUNT(*) FROM applications a WHERE a.job_id = j.id AND a.status = 'pending') AS pending_applicant_count,
+  (SELECT COUNT(*) FROM assignments s WHERE s.job_id = j.id AND s.status <> 'cancelled') AS active_assignment_count,
+  (SELECT COUNT(*) FROM assignments s WHERE s.job_id = j.id
+      AND s.status IN ('in_progress', 'completion_pending', 'disputed', 'completed')) AS started_assignment_count`;
 
-/** Statuses in which the employer may still edit or close the job. */
-const EDITABLE_STATUSES = ['open'];
+/** Statuses in which the employer may still edit, close or cancel the job. */
+const EDITABLE_STATUSES = ['open', 'filled'];
 const CLOSABLE_STATUSES = ['open', 'filled'];
+// Once workers are confirmed, only the number of workers needed can change.
+const FIELDS_EDITABLE_WITH_WORKERS = ['workersRequired'];
 
 function toEmployerJob(row) {
   const summary = toJobSummary(row);
@@ -110,8 +115,12 @@ function toEmployerJob(row) {
     applicants: { total: row.applicant_count, pending: row.pending_applicant_count },
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    confirmedWorkers: row.active_assignment_count,
     canEdit: EDITABLE_STATUSES.includes(row.status),
+    canEditDetails: EDITABLE_STATUSES.includes(row.status) && row.active_assignment_count === 0,
     canClose: CLOSABLE_STATUSES.includes(row.status),
+    // Cancelling is only possible before any confirmed work has started.
+    canCancel: CLOSABLE_STATUSES.includes(row.status) && row.started_assignment_count === 0,
   };
 }
 
@@ -176,6 +185,13 @@ export function getEmployerDashboard(db, employerId, today) {
       rejected: count(GROUP_SQL.rejected),
       filled: count(GROUP_SQL.filled),
       ended: count(GROUP_SQL.ended),
+      activeAssignments: db
+        .prepare(
+          `SELECT COUNT(*) FROM assignments s JOIN jobs j ON j.id = s.job_id
+            WHERE j.employer_id = ? AND s.status IN ('confirmed', 'in_progress', 'completion_pending', 'disputed')`,
+        )
+        .pluck()
+        .get(employerId),
       pendingApplicants: db
         .prepare(
           `SELECT COUNT(*) FROM applications a JOIN jobs j ON j.id = a.job_id
@@ -258,10 +274,13 @@ function jobAsInput(row) {
 const FIELDS_NOT_NEEDING_REVIEW = ['workersRequired'];
 
 /**
- * Edits an open job. Returns { reviewRequired, changedFields }.
+ * Edits an open or filled job. Returns { reviewRequired, changedFields }.
  * Rules:
- *  - only 'open' jobs can be edited (filled/closed/ended jobs cannot)
- *  - workersRequired can never go below workers already assigned
+ *  - only 'open'/'filled' jobs can be edited (closed/ended jobs cannot)
+ *  - workersRequired can never go below workers already assigned; changing
+ *    it moves the job between open and filled automatically (DB trigger)
+ *  - once workers are confirmed, only workersRequired may change — the wage,
+ *    dates and other terms they agreed to are locked
  *  - pending or rejected jobs stay/return to 'pending' after an edit
  *  - approved jobs return to 'pending' when reviewed fields change
  *  - workers with pending/accepted applications are notified of changes
@@ -283,6 +302,11 @@ export function updateJob(db, employerId, jobId, input) {
       const after = { ...input, address: input.address ?? null, endDate: input.endDate ?? null, requirements: input.requirements ?? null };
       const changedFields = JOB_FIELDS.filter((field) => before[field] !== after[field]);
       if (changedFields.length === 0) return { reviewRequired: false, changedFields };
+      if (row.active_assignment_count > 0 && changedFields.some((f) => !FIELDS_EDITABLE_WITH_WORKERS.includes(f))) {
+        throw new HttpError(409, 'JOB_HAS_WORKERS', 'Workers are already confirmed; only the number of workers can change.', {
+          changedFields,
+        });
+      }
 
       const reviewRequired =
         row.approval_status !== 'approved' || changedFields.some((f) => !FIELDS_NOT_NEEDING_REVIEW.includes(f));
@@ -339,14 +363,54 @@ export function closeJob(db, employerId, jobId, reason) {
     .immediate();
 }
 
+/**
+ * Cancels a job that has not started: every confirmed worker's assignment is
+ * cancelled (places freed, workers notified) and the job becomes 'cancelled'.
+ * Refused once any assignment is in progress, awaiting completion, disputed
+ * or completed — those must be settled individually.
+ */
+export function cancelJob(db, employerId, jobId, reason) {
+  return db
+    .transaction(() => {
+      const row = findOwnJobRow(db, employerId, jobId);
+      if (!CLOSABLE_STATUSES.includes(row.status) || row.started_assignment_count > 0) {
+        throw new HttpError(409, 'JOB_NOT_CANCELLABLE', 'This job cannot be cancelled.', {
+          status: row.status,
+          startedAssignments: row.started_assignment_count,
+        });
+      }
+      const now = nowIso();
+      const notify = db.prepare(
+        `INSERT INTO notifications (user_id, type, params, job_id, application_id, assignment_id)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+      );
+
+      for (const s of db
+        .prepare(`SELECT id, worker_id, application_id FROM assignments WHERE job_id = ? AND status = 'confirmed'`)
+        .all(jobId)) {
+        db.prepare(
+          `UPDATE assignments SET status = 'cancelled', cancelled_at = ?, cancelled_by = ?, cancellation_reason = ?, updated_at = ?
+            WHERE id = ?`,
+        ).run(now, employerId, reason, now, s.id);
+        notify.run(s.worker_id, 'assignment_cancelled', JSON.stringify({ jobTitle: row.title, by: 'employer', reason }), jobId, s.application_id, s.id);
+      }
+      for (const app of db.prepare(`SELECT id, worker_id FROM applications WHERE job_id = ? AND status = 'pending'`).all(jobId)) {
+        notify.run(app.worker_id, 'job_cancelled', JSON.stringify({ jobTitle: row.title }), jobId, app.id, null);
+      }
+
+      db.prepare(`UPDATE jobs SET status = 'cancelled', status_reason = ?, updated_at = ? WHERE id = ?`).run(reason, now, jobId);
+    })
+    .immediate();
+}
+
 // ---------------------------------------------------------------------------
-// Applicants (viewing only — accept/reject arrives in Phase 5)
+// Applicants
 // ---------------------------------------------------------------------------
 
 /**
  * Applicants for the employer's own jobs. Shows what helps an employer decide
- * (name, area, skills, message) — not the worker's phone number, which is
- * shared only after acceptance.
+ * (name, area, skills, message). The worker's phone number is included only
+ * once the employer has accepted them.
  */
 export function listApplicants(db, employerId, { jobId, status }) {
   if (jobId) findOwnJobRow(db, employerId, jobId); // 404 if not theirs
@@ -355,12 +419,14 @@ export function listApplicants(db, employerId, { jobId, status }) {
     .prepare(
       `SELECT a.id, a.status, a.message, a.applied_at AS appliedAt, a.decided_at AS decidedAt,
               j.id AS job_id, j.title AS job_title, j.status AS job_status, j.approval_status AS job_approval,
-              u.id AS worker_id, u.full_name AS worker_name, u.created_at AS worker_since,
-              wp.district AS worker_district, wp.locality AS worker_locality, wp.skills AS worker_skills
+              u.id AS worker_id, u.full_name AS worker_name, u.created_at AS worker_since, u.phone AS worker_phone,
+              wp.district AS worker_district, wp.locality AS worker_locality, wp.skills AS worker_skills,
+              s.id AS assignment_id, s.status AS assignment_status
          FROM applications a
          JOIN jobs j ON j.id = a.job_id
          JOIN users u ON u.id = a.worker_id
          LEFT JOIN worker_profiles wp ON wp.user_id = a.worker_id
+         LEFT JOIN assignments s ON s.application_id = a.id
         WHERE j.employer_id = @employerId
           AND (@jobId IS NULL OR j.id = @jobId)
           AND (@status IS NULL OR a.status = @status)
@@ -375,9 +441,14 @@ export function listApplicants(db, employerId, { jobId, status }) {
     appliedAt: row.appliedAt,
     decidedAt: row.decidedAt,
     job: { id: row.job_id, title: row.job_title, status: row.job_status, approvalStatus: row.job_approval },
+    assignment: row.assignment_id ? { id: row.assignment_id, status: row.assignment_status } : null,
+    // Hints for the UI; the accept/reject endpoints re-check everything.
+    canAccept: row.status === 'pending' && row.job_approval === 'approved' && row.job_status === 'open',
+    canReject: row.status === 'pending',
     worker: {
       id: row.worker_id,
       name: row.worker_name,
+      phone: row.status === 'accepted' ? row.worker_phone : null,
       district: row.worker_district ? districtOf(row.worker_district) : null,
       locality: row.worker_locality,
       skills: row.worker_skills ? JSON.parse(row.worker_skills) : [],

@@ -135,6 +135,7 @@ describe('applications, assignments and reviews', () => {
     const applicationId = Number(
       db.prepare('INSERT INTO applications (job_id, worker_id) VALUES (?, ?)').run(jobId, worker).lastInsertRowid,
     );
+    db.prepare("UPDATE applications SET status = 'accepted' WHERE id = ?").run(applicationId);
     return { employer, worker, jobId, applicationId };
   }
 
@@ -169,6 +170,8 @@ describe('applications, assignments and reviews', () => {
 
     expect(() => review.run(assignmentId, employer, worker, 5)).toThrow(/completed assignment/);
 
+    // Completion goes through completion_pending (direct jumps are refused).
+    db.prepare(`UPDATE assignments SET status = 'completion_pending' WHERE id = ?`).run(assignmentId);
     db.prepare(
       `UPDATE assignments SET status = 'completed', completed_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?`,
     ).run(assignmentId);

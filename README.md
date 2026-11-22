@@ -16,7 +16,7 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 | 2 | Authentication (register, login, logout, roles, sessions) | **Done** |
 | 3 | Worker module (job browsing, search, filters, job details, applications) | **Done** (profile editing still to come) |
 | 4 | Employer module (profile, dashboard, job posting & management, applicant viewing) | **Done** |
-| 5 | Applications & assignments (accept/reject, capacity, assignments) | Planned |
+| 5 | Applications & assignments (accept/reject, capacity, assignments) | **Done** |
 | 6 | Admin (dashboard, approvals, users, moderation, audit log) | Planned |
 | 7 | Trust (completion, payments, ratings, reports) | Planned |
 | 8 | Notifications & full translation review | Planned |
@@ -34,10 +34,11 @@ hotels, hospitals and institutions — with people looking for daily-wage, part-
 
 - Employer profile editing and an employer dashboard with live counts.
 - Posting jobs (with a preview step), editing and closing them.
-- Viewing applicants.
+- Viewing, accepting and rejecting applicants, with protection against overbooking.
+- Assignments for workers and employers: start, confirm completion on both sides, cancel, report a problem.
 
 **What does not work yet:**
-- Accepting or rejecting applicants (Phase 5).
+- Recording payments and ratings (Phase 7).
 - The admin screens (Phase 6). Until then, approve employers and jobs in the database, for example with
   `UPDATE employer_profiles SET verification_status = 'approved' WHERE user_id = …`.
 

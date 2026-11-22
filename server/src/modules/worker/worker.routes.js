@@ -12,6 +12,7 @@ import {
   listWorkerApplications,
   withdrawApplication,
 } from '../applications/applications.service.js';
+import { addAssignmentRoutes } from '../assignments/assignments.routes.js';
 
 const WAGE_BASES = ['per_hour', 'per_day', 'per_week', 'per_task'];
 const DURATIONS = ['few_hours', 'one_day', 'multiple_days', 'short_term'];
@@ -90,6 +91,8 @@ export function createWorkerRouter({ db }) {
       );
     },
   );
+
+  addAssignmentRoutes(router, { db, role: ROLES.WORKER });
 
   router.post('/applications/:applicationId/withdraw', (req, res) => {
     const applicationId = idParam(req.params.applicationId, 'APPLICATION_NOT_FOUND');

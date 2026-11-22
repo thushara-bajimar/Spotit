@@ -239,7 +239,15 @@
     "CANNOT_WITHDRAW": "Only pending applications can be withdrawn.",
     "EMPLOYER_NOT_APPROVED": "Your employer account must be approved before you can post jobs.",
     "JOB_NOT_EDITABLE": "This job can no longer be edited.",
-    "JOB_NOT_CLOSABLE": "This job cannot be closed."
+    "JOB_NOT_CLOSABLE": "This job cannot be closed.",
+    "APPLICATION_NOT_PENDING": "This application has already been handled.",
+    "NO_VACANCIES": "All places for this job are already filled.",
+    "WORKER_UNAVAILABLE": "This worker's account is not active.",
+    "ALREADY_ASSIGNED": "This worker is already confirmed for this job.",
+    "ASSIGNMENT_NOT_FOUND": "This work could not be found.",
+    "ACTION_NOT_ALLOWED": "This action is not possible right now. Please refresh the page.",
+    "JOB_HAS_WORKERS": "Workers are already confirmed, so only the number of workers can be changed.",
+    "JOB_NOT_CANCELLABLE": "This job can no longer be cancelled because work has already started."
   },
   "notFound": {
     "title": "Page not found",
@@ -391,7 +399,8 @@
       "accepted": "You have been selected! Contact details are shown below.",
       "rejected": "The employer chose other workers this time.",
       "withdrawn": "You withdrew this application."
-    }
+    },
+    "viewAssignment": "View my work"
   },
   "applicationStatus": {
     "pending": "Pending",
@@ -448,7 +457,8 @@
         "live": "Live",
         "filled": "Filled",
         "ended": "Closed or ended",
-        "pendingApplicants": "New applicants"
+        "pendingApplicants": "New applicants",
+        "activeAssignments": "Confirmed workers"
       },
       "recentJobs": "Recent jobs"
     },
@@ -529,8 +539,18 @@
         "updated": "Changes saved.",
         "resubmitted": "Changes saved. The job has been sent for review again and is hidden from workers until it is approved.",
         "unchanged": "No changes were made.",
-        "closed": "The job has been closed."
-      }
+        "closed": "The job has been closed.",
+        "accepted": "{{name}} has been accepted and confirmed for this job.",
+        "rejected": "{{name}}'s application was rejected.",
+        "cancelled": "The job has been cancelled."
+      },
+      "confirmedWorkers": "Confirmed workers",
+      "noConfirmedWorkers": "No confirmed workers yet. Accept applicants below.",
+      "termsLocked": "Workers are confirmed, so only the number of workers can be changed.",
+      "cancel": "Cancel job",
+      "cancelConfirm": "Cancel this job?",
+      "cancelExplain": "All confirmed workers will be told and their work cancelled. This cannot be undone.",
+      "cancelYes": "Yes, cancel job"
     },
     "edit": {
       "title": "Edit job",
@@ -539,7 +559,8 @@
       "submit": "Save and submit for review",
       "submitApproved": "Save changes",
       "reviewWarning": "This job is live. Changing anything other than the number of workers sends it back for admin review, and it will be hidden from workers until approved.",
-      "resubmitNote": "This job was not approved (reason: {{reason}}). Saving your changes sends it for review again."
+      "resubmitNote": "This job was not approved (reason: {{reason}}). Saving your changes sends it for review again.",
+      "termsLocked": "Workers are already confirmed for this job. To protect what they agreed to, only the number of workers can be changed."
     },
     "applicants": {
       "title": "Applicants",
@@ -551,7 +572,17 @@
       "empty": "No applicants yet.",
       "emptyForJob": "No one has applied to this job yet.",
       "loadError": "We couldn't load applicants.",
-      "viewOnlyNote": "Accepting and rejecting applicants will be available soon. Phone numbers are shared after you accept a worker."
+      "accept": "Accept",
+      "reject": "Reject",
+      "acceptConfirm": "Accept {{name}} for this job?",
+      "rejectConfirm": "Reject {{name}}?",
+      "acceptExplain": "They will be confirmed for the work and you will both see each other's phone number.",
+      "rejectExplain": "They will be told they were not selected this time.",
+      "acceptYes": "Yes, accept",
+      "rejectYes": "Yes, reject",
+      "viewAssignment": "View confirmed work",
+      "cannotAcceptNow": "This job is not accepting workers right now (it is waiting for approval, filled or closed).",
+      "contactNote": "Phone numbers are shared once you accept a worker."
     },
     "profile": {
       "edit": "Edit profile",
@@ -576,6 +607,164 @@
       "flash": {
         "saved": "Profile saved.",
         "resubmitted": "Profile saved and sent for review. You can post jobs again once it is approved."
+      }
+    }
+  },
+  "myWork": {
+    "title": "My work",
+    "subtitle": "Your confirmed work and the jobs you applied for.",
+    "tabs": {
+      "work": "Confirmed work",
+      "applications": "Applications"
+    }
+  },
+  "assignments": {
+    "employerTitle": "Confirmed workers",
+    "employerSubtitle": "Workers you have accepted, across all your jobs.",
+    "status": {
+      "confirmed": "Confirmed",
+      "in_progress": "In progress",
+      "completion_pending": "Awaiting confirmation",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "disputed": "Disputed"
+    },
+    "groups": {
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "empty": {
+      "active": {
+        "worker": "You have no confirmed work right now.",
+        "employer": "No confirmed workers yet."
+      },
+      "completed": {
+        "worker": "No completed work yet.",
+        "employer": "No completed work yet."
+      },
+      "cancelled": {
+        "worker": "No cancelled work.",
+        "employer": "No cancelled work."
+      }
+    },
+    "emptyAction": {
+      "worker": "Find work",
+      "employer": "Review applicants"
+    },
+    "actionNeeded": "Your confirmation is needed",
+    "back": {
+      "worker": "Back to my work",
+      "employer": "Back to confirmed workers"
+    },
+    "notFound": "This work could not be found.",
+    "loadError": "We couldn't load this work.",
+    "agreedWage": "Agreed wage",
+    "paymentStatus": "Payment",
+    "payment": {
+      "pending": "Not yet recorded as paid",
+      "paid": "Paid",
+      "disputed": "Disputed"
+    },
+    "viewJob": "View job details",
+    "reason": "Reason",
+    "contactTitle": {
+      "worker": "Employer contact",
+      "employer": "Worker contact"
+    },
+    "history": "History",
+    "nextSteps": "Next steps",
+    "noActions": {
+      "completed": "This work is complete. Payments and ratings are coming soon.",
+      "cancelled": "This work was cancelled.",
+      "disputed": "An admin will look into this dispute.",
+      "default": "Nothing to do right now."
+    },
+    "waitingFor": {
+      "worker": "You confirmed the work is done. Waiting for the employer to confirm.",
+      "employer": "You confirmed the work is done. Waiting for the worker to confirm."
+    },
+    "statusHelp": {
+      "confirmed": {
+        "worker": "You are confirmed for this work. Contact the employer if you have questions.",
+        "employer": "This worker is confirmed. Mark the work as started when they begin."
+      },
+      "in_progress": {
+        "worker": "The work has started. Confirm when it is done.",
+        "employer": "The work is in progress. Confirm when it is done."
+      },
+      "completion_pending": {
+        "worker": "The employer says the work is done. Please confirm, or report a problem.",
+        "employer": "The worker says the work is done. Please confirm, or report a problem."
+      },
+      "completed": {
+        "worker": "Both of you confirmed the work is complete.",
+        "employer": "Both of you confirmed the work is complete."
+      },
+      "cancelled": {
+        "worker": "This work was cancelled.",
+        "employer": "This work was cancelled."
+      },
+      "disputed": {
+        "worker": "There is a disagreement about this work. An admin will review it.",
+        "employer": "There is a disagreement about this work. An admin will review it."
+      }
+    },
+    "timeline": {
+      "confirmed": "Selected for the job",
+      "started": "Work started",
+      "workerConfirmed": "Worker confirmed the work is done",
+      "employerConfirmed": "Employer confirmed the work is done",
+      "completed": "Work completed",
+      "cancelled": "Cancelled",
+      "disputed": "Problem reported"
+    },
+    "by": {
+      "worker": "by the worker",
+      "employer": "by the employer"
+    },
+    "flash": {
+      "start": "Marked as started.",
+      "complete": "Your confirmation was recorded.",
+      "cancel": "This work has been cancelled.",
+      "dispute": "Your problem report was recorded. An admin will review it."
+    },
+    "actions": {
+      "start": {
+        "button": "Mark work as started",
+        "confirm": "Mark this work as started?",
+        "yes": "Yes, it has started",
+        "explain": {
+          "worker": "Only the employer can mark the work as started.",
+          "employer": "Do this when the worker begins the work."
+        }
+      },
+      "complete": {
+        "button": "Confirm work is done",
+        "confirm": "Confirm the work is done?",
+        "yes": "Yes, it is done",
+        "explain": {
+          "worker": "The work is completed when both you and the employer confirm.",
+          "employer": "The work is completed when both you and the worker confirm."
+        }
+      },
+      "cancel": {
+        "button": "Cancel this work",
+        "confirm": "Cancel this work?",
+        "yes": "Yes, cancel",
+        "explain": {
+          "worker": "The employer will be told, and your place will be given to someone else.",
+          "employer": "The worker will be told, and the place will open again for applicants."
+        }
+      },
+      "dispute": {
+        "button": "Report a problem",
+        "confirm": "Report a problem with this work?",
+        "yes": "Report problem",
+        "explain": {
+          "worker": "Use this if you disagree about the work. An admin will review it.",
+          "employer": "Use this if you disagree about the work. An admin will review it."
+        }
       }
     }
   }

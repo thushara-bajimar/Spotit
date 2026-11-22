@@ -10,6 +10,7 @@ import { jobSchema, refineJob } from '../jobs/jobs.schemas.js';
 import {
   JOB_GROUPS,
   assertApproved,
+  cancelJob,
   closeJob,
   createJob,
   getEmployerDashboard,
@@ -20,6 +21,8 @@ import {
   updateEmployerProfile,
   updateJob,
 } from './employer.service.js';
+import { acceptApplication, rejectApplication } from '../assignments/assignments.service.js';
+import { addAssignmentRoutes } from '../assignments/assignments.routes.js';
 
 const APPLICATION_STATUSES = ['pending', 'accepted', 'rejected', 'withdrawn'];
 
@@ -30,8 +33,10 @@ const APPLICATION_STATUSES = ['pending', 'accepted', 'rejected', 'withdrawn'];
  *   GET  /profile                 PUT /profile
  *   GET  /dashboard
  *   GET  /jobs?group=             POST /jobs            (approved employers only)
- *   GET  /jobs/:jobId             PUT  /jobs/:jobId     POST /jobs/:jobId/close
+ *   GET  /jobs/:jobId             PUT  /jobs/:jobId     POST /jobs/:jobId/close   POST /jobs/:jobId/cancel
  *   GET  /applicants?jobId=&status=
+ *   POST /jobs/:jobId/applications/:applicationId/accept | reject
+ *   GET  /assignments …           (see assignments.routes.js)
  */
 export function createEmployerRouter({ db }) {
   const router = Router();
@@ -104,7 +109,33 @@ export function createEmployerRouter({ db }) {
     res.json({ job: getEmployerJob(db, req.user.id, jobId, todayInIndia()) });
   });
 
-  // ---- Applicants (view only in Phase 4) -------------------------------------
+  router.post('/jobs/:jobId/cancel', validateBody({ reason: text({ min: 3, max: 300 }) }), (req, res) => {
+    const jobId = idParam(req.params.jobId, 'JOB_NOT_FOUND');
+    cancelJob(db, req.user.id, jobId, req.body.reason);
+    res.json({ job: getEmployerJob(db, req.user.id, jobId, todayInIndia()) });
+  });
+
+  // ---- Selecting workers -----------------------------------------------------
+  router.post('/jobs/:jobId/applications/:applicationId/accept', (req, res) => {
+    const jobId = idParam(req.params.jobId, 'JOB_NOT_FOUND');
+    const applicationId = idParam(req.params.applicationId, 'APPLICATION_NOT_FOUND');
+    const assignmentId = acceptApplication(db, { employerId: req.user.id, jobId, applicationId, today: todayInIndia() });
+    res.status(201).json({
+      assignmentId,
+      job: getEmployerJob(db, req.user.id, jobId, todayInIndia()),
+    });
+  });
+
+  router.post('/jobs/:jobId/applications/:applicationId/reject', (req, res) => {
+    const jobId = idParam(req.params.jobId, 'JOB_NOT_FOUND');
+    const applicationId = idParam(req.params.applicationId, 'APPLICATION_NOT_FOUND');
+    rejectApplication(db, { employerId: req.user.id, jobId, applicationId });
+    res.json({ job: getEmployerJob(db, req.user.id, jobId, todayInIndia()) });
+  });
+
+  addAssignmentRoutes(router, { db, role: ROLES.EMPLOYER });
+
+  // ---- Applicants -----------------------------------------------------------
   router.get(
     '/applicants',
     validateQuery({ jobId: integer({ min: 1 }), status: oneOf(APPLICATION_STATUSES, { required: false }) }),

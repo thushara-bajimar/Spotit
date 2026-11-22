@@ -7,7 +7,8 @@ const jobNotFound = () => new HttpError(404, 'JOB_NOT_FOUND', 'Job not found.');
 function findOwnApplication(db, jobId, workerId) {
   return db
     .prepare(
-      `SELECT id, status, message, applied_at AS appliedAt, decided_at AS decidedAt, withdrawn_at AS withdrawnAt
+      `SELECT id, status, message, applied_at AS appliedAt, decided_at AS decidedAt, withdrawn_at AS withdrawnAt,
+              (SELECT s.id FROM assignments s WHERE s.application_id = applications.id) AS assignmentId
          FROM applications WHERE job_id = ? AND worker_id = ?`,
     )
     .get(jobId, workerId);
@@ -142,7 +143,7 @@ export function listWorkerApplications(db, { workerId, status, today }) {
   const rows = db
     .prepare(
       `SELECT a.id AS application_id, a.status AS application_status, a.message AS application_message,
-              a.applied_at, a.decided_at, a.withdrawn_at,
+              a.applied_at, a.decided_at, a.withdrawn_at, s.id AS assignment_id, s.status AS assignment_status,
               j.id, j.title, j.district, j.locality, j.start_date, j.end_date, j.start_time, j.end_time,
               j.duration_type, j.wage_amount, j.wage_basis, j.workers_required, j.workers_assigned,
               j.approval_status, j.status, j.created_at, j.reviewed_at,
@@ -155,6 +156,7 @@ export function listWorkerApplications(db, { workerId, status, today }) {
          JOIN job_categories c ON c.id = j.category_id
          JOIN users u ON u.id = j.employer_id
          JOIN employer_profiles ep ON ep.user_id = j.employer_id
+         LEFT JOIN assignments s ON s.application_id = a.id
         WHERE a.worker_id = @workerId AND (@status IS NULL OR a.status = @status)
         ORDER BY a.applied_at DESC, a.id DESC`,
     )
@@ -176,6 +178,7 @@ export function listWorkerApplications(db, { workerId, status, today }) {
       decidedAt: row.decided_at,
       withdrawnAt: row.withdrawn_at,
       canWithdraw: row.application_status === 'pending',
+      assignment: row.assignment_id ? { id: row.assignment_id, status: row.assignment_status } : null,
       job: { ...toJobSummary(row), unavailableReason: unavailableReason(row, today) },
     })),
     counts: {

@@ -1,9 +1,10 @@
-import { useCallback } from 'react';
-import { useSearchParams } from 'react-router';
+import { useCallback, useState } from 'react';
+import { Link, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { Select } from '../../components/ui/Select.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { StateView } from '../../components/ui/StateView.jsx';
+import { Notice } from '../../components/ui/Notice.jsx';
 import { ApplicantCard } from '../../components/employer/ApplicantCard.jsx';
 import { useApiData } from '../../hooks/useApiData.js';
 import { fetchApplicants, fetchEmployerJobs } from '../../services/employerService.js';
@@ -23,6 +24,7 @@ export function ApplicantsPage() {
   const applicants = useApiData(fetcher);
   const jobs = useApiData(fetchAllJobs);
   const categories = useApiData(fetchCategories);
+  const [flash, setFlash] = useState(null);
 
   const setFilter = (key, value) => {
     const next = new URLSearchParams(params);
@@ -33,8 +35,15 @@ export function ApplicantsPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <h1 className="text-3xl font-bold text-forest-900">{t('employer.applicants.title')}</h1>
-      <p className="mt-1 text-muted">{t('employer.applicants.subtitle')}</p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold text-forest-900">{t('employer.applicants.title')}</h1>
+          <p className="mt-1 text-muted">{t('employer.applicants.subtitle')}</p>
+        </div>
+        <Button as={Link} to="/employer/assignments" variant="secondary" size="sm">
+          {t('assignments.employerTitle')}
+        </Button>
+      </div>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <Select
@@ -57,7 +66,12 @@ export function ApplicantsPage() {
         />
       </div>
 
-      <p className="mt-4 text-sm text-muted">{t('employer.applicants.viewOnlyNote')}</p>
+      <p className="mt-4 text-sm text-muted">{t('employer.applicants.contactNote')}</p>
+      {flash && (
+        <Notice role="status" className="mt-3">
+          {t(`employer.job.flash.${flash.key}`, { name: flash.name })}
+        </Notice>
+      )}
 
       <div className="mt-4">
         {applicants.status === 'loading' && !applicants.data && <StateView variant="loading" title={t('common.loading')} />}
@@ -80,7 +94,15 @@ export function ApplicantsPage() {
           <ul className="space-y-3">
             {applicants.data.map((applicant) => (
               <li key={applicant.id}>
-                <ApplicantCard applicant={applicant} categories={categories.data} showJob={!jobId} />
+                <ApplicantCard
+                  applicant={applicant}
+                  categories={categories.data}
+                  showJob={!jobId}
+                  onDecided={(decision, result) => {
+                    setFlash({ key: decision === 'accept' ? 'accepted' : 'rejected', name: result.workerName });
+                    applicants.retry();
+                  }}
+                />
               </li>
             ))}
           </ul>

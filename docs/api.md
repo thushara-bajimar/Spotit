@@ -304,6 +304,87 @@ Each item contains:
 The worker's phone number is **not** included; it is shared only after acceptance (Phase 5). This phase
 is view-only: accepting and rejecting arrive in Phase 5.
 
+## Worker selection and assignments (Phase 5)
+
+### `POST /api/employer/jobs/:jobId/applications/:applicationId/accept`
+Employer only. Everything below runs in one `IMMEDIATE` SQLite transaction; any failure rolls it all
+back.
+
+The checks run in this order:
+1. The job belongs to the employer, and the application belongs to that job. Otherwise:
+   404 `APPLICATION_NOT_FOUND`.
+2. The application is still `pending`. Otherwise: 409 `APPLICATION_NOT_PENDING` with `details.status`.
+3. The job is available: approved, open, not past, and the employer is approved. Otherwise:
+   409 `JOB_UNAVAILABLE` with `details.reason`.
+4. There is a free place. Otherwise: 409 `NO_VACANCIES`.
+5. The worker is active. Otherwise: 409 `WORKER_UNAVAILABLE`.
+6. The worker has no assignment for this job yet. Otherwise: 409 `ALREADY_ASSIGNED`.
+
+Then:
+1. The application is set to `accepted`.
+2. An **assignment** is created with status `confirmed`. A database trigger adds 1 to
+   `jobs.workers_assigned`, and the job becomes `filled` when it reaches capacity.
+3. A **payment** record is created with the job's `wage_amount` and `wage_basis` and status `pending`.
+4. The worker gets an `application_accepted` notification.
+
+**201** → `{ assignmentId, job }`
+
+Overbooking is impossible even outside this code path: an assignment insert that would push
+`workers_assigned` past `workers_required` fails the CHECK constraint on `jobs`.
+
+### `POST /api/employer/jobs/:jobId/applications/:applicationId/reject`
+Applies to pending applications only. It creates no assignment, and the worker gets an
+`application_rejected` notification.
+
+**200** → `{ job }`
+
+### `POST /api/employer/jobs/:jobId/cancel`
+Body: `{ "reason": string }` (required).
+
+What it does:
+1. Cancels every `confirmed` assignment, which frees the places and notifies each worker.
+2. Notifies pending applicants.
+3. Sets the job to `cancelled`.
+
+It is refused with 409 `JOB_NOT_CANCELLABLE` once any assignment is `in_progress`,
+`completion_pending`, `disputed` or `completed`.
+
+### Job edits with confirmed workers
+Once a job has any non-cancelled assignment, only `workersRequired` may change. Any other change gets
+409 `JOB_HAS_WORKERS`. Raising `workersRequired` on a `filled` job reopens it automatically.
+
+### Assignments: `/api/worker/assignments` and `/api/employer/assignments`
+Both roles have the same endpoints. Each caller only ever sees their own assignments; any other
+assignment returns 404 `ASSIGNMENT_NOT_FOUND`.
+
+| Endpoint | Meaning |
+|---|---|
+| `GET /assignments?group=active\|completed\|cancelled[&jobId=]` | List |
+| `GET /assignments/:id` | Details |
+| `POST /assignments/:id/:action` | `start` \| `complete` \| `cancel` \| `dispute`. `{ reason }` is required for `cancel` and `dispute`. |
+
+The assignment object contains:
+- `id`, `status`, `confirmedAt`, `startedAt`, `workerConfirmedAt`, `employerConfirmedAt`, `completedAt`
+- `cancelledAt`, `cancelledBy` (`worker`/`employer`), `cancellationReason`
+- `disputedAt`, `disputedBy`, `disputeReason`
+- `job` (summary + `address`)
+- `payment { agreedAmount, wageBasis, status }`
+- the other party's details:
+  - for a worker: `employer { name, type, verified, phone }`
+  - for an employer: `worker { name, phone, district, locality, skills }`
+- `actions`: the actions this caller may take now
+
+**Actions.** The server checks every action and replies 409 `ACTION_NOT_ALLOWED` when it doesn't apply:
+
+| Action | Who | From | Result |
+|---|---|---|---|
+| `start` | employer | `confirmed` (on or after the start date) | `in_progress` |
+| `complete` | either | `confirmed`, `in_progress` or `completion_pending` (on or after the start date; once per side) | `completion_pending`, or `completed` when the other side has already confirmed |
+| `cancel` | either | `confirmed` or `in_progress`, if no one has confirmed completion yet | `cancelled`. The place is freed and a filled job reopens. |
+| `dispute` | either | `in_progress` or `completion_pending` | `disputed`. An admin resolves it (Phase 6/7). |
+
+Every action notifies the other party. Allowed status transitions are also enforced by a database trigger.
+
 ## Role-protected endpoints
 
 Every route under these paths checks the role on the server.

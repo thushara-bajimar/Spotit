@@ -15,6 +15,7 @@ const TILES = [
   { key: 'live', group: 'live' },
   { key: 'filled', group: 'filled' },
   { key: 'ended', group: 'ended' },
+  { key: 'activeAssignments', to: '/employer/assignments' },
   { key: 'pendingApplicants', to: '/employer/applicants?status=pending' },
 ];
 

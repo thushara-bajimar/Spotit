@@ -14,54 +14,67 @@ import { JobFacts } from '../../components/jobs/JobFacts.jsx';
 import { JobStatusBadge, employerJobStatus } from '../../components/employer/JobStatusBadge.jsx';
 import { ApplicantCard } from '../../components/employer/ApplicantCard.jsx';
 import { useApiData } from '../../hooks/useApiData.js';
-import { closeJobRequest, fetchApplicants, fetchEmployerJob } from '../../services/employerService.js';
+import { cancelJobRequest, closeJobRequest, fetchApplicants, fetchEmployerJob } from '../../services/employerService.js';
+import { fetchAssignments } from '../../services/assignmentService.js';
+import { AssignmentCard } from '../../components/assignments/AssignmentCard.jsx';
 import { fetchCategories } from '../../services/categoryService.js';
 import { localName } from '../../utils/format.js';
 
-function CloseJobControl({ jobId, onClosed }) {
+/**
+ * Close or cancel the job, with an inline confirmation step.
+ * Closing stops new applications; cancelling also cancels confirmed workers
+ * (reason required).
+ */
+function JobEndControl({ kind, jobId, onDone }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState('');
   const [busy, setBusy] = useState(false);
-  const [errorCode, setErrorCode] = useState(null);
+  const [error, setError] = useState(null);
+  const reasonRequired = kind === 'cancel';
 
   if (!open) {
     return (
-      <Button variant="secondary" onClick={() => setOpen(true)}>
-        {t('employer.job.close')}
+      <Button variant="secondary" fullWidth onClick={() => setOpen(true)}>
+        {t(`employer.job.${kind}`)}
       </Button>
     );
   }
 
-  const close = async () => {
+  const submit = async () => {
+    if (reasonRequired && reason.trim().length < 3) {
+      setError({ field: true });
+      return;
+    }
     setBusy(true);
-    setErrorCode(null);
+    setError(null);
     try {
-      await closeJobRequest(jobId, reason.trim());
-      onClosed();
-    } catch (error) {
-      setErrorCode(error.code ?? 'generic');
+      await (kind === 'cancel' ? cancelJobRequest : closeJobRequest)(jobId, reason.trim());
+      onDone(kind);
+    } catch (err) {
+      setError(err);
       setBusy(false);
     }
   };
 
   return (
     <div className="w-full rounded-xl border border-amber-300 bg-amber-100 p-4">
-      <p className="font-semibold text-ink">{t('employer.job.closeConfirm')}</p>
-      <p className="mt-1 text-sm text-ink">{t('employer.job.closeExplain')}</p>
+      <p className="font-semibold text-ink">{t(`employer.job.${kind}Confirm`)}</p>
+      <p className="mt-1 text-sm text-ink">{t(`employer.job.${kind}Explain`)}</p>
       <Textarea
         className="mt-3"
         label={t('employer.job.closeReason')}
-        optionalLabel={t('common.optional')}
+        optionalLabel={reasonRequired ? undefined : t('common.optional')}
         value={reason}
         onChange={(event) => setReason(event.target.value)}
         maxLength={300}
         rows={2}
+        error={error?.field ? t('validation.required') : undefined}
       />
-      <FormError code={errorCode} className="mt-2" />
+      {error && !error.field && <FormError code={error.code} className="mt-2" />}
       <div className="mt-3 flex flex-wrap gap-2">
-        <Button onClick={close} disabled={busy}>
-          {t('employer.job.closeYes')}
+        <Button onClick={submit} disabled={busy}>
+          {t(`employer.job.${kind}Yes`)}
         </Button>
         <Button variant="ghost" onClick={() => setOpen(false)} disabled={busy}>
           {t('common.cancel')}
@@ -78,13 +91,21 @@ export function EmployerJobPage() {
   const { jobId } = useParams();
   const location = useLocation();
   const flash = location.state?.flash ?? null; // set after create/edit
-  const [closedFlash, setClosedFlash] = useState(false);
+  const [actionFlash, setActionFlash] = useState(null);
 
   const jobFetcher = useCallback(({ signal }) => fetchEmployerJob(jobId, { signal }), [jobId]);
   const applicantsFetcher = useCallback(({ signal }) => fetchApplicants({ jobId }, { signal }), [jobId]);
+  const assignmentsFetcher = useCallback(({ signal }) => fetchAssignments('employer', { jobId }, { signal }), [jobId]);
   const { status, data: job, error, retry } = useApiData(jobFetcher);
   const applicants = useApiData(applicantsFetcher);
+  const assignments = useApiData(assignmentsFetcher);
   const categories = useApiData(fetchCategories);
+
+  const reloadAll = () => {
+    retry();
+    applicants.retry();
+    assignments.retry();
+  };
 
   const back = (
     <Link to="/employer/jobs" className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-forest-700 hover:underline">
@@ -118,9 +139,9 @@ export function EmployerJobPage() {
           {t(`employer.job.flash.${flash}`)}
         </Notice>
       )}
-      {closedFlash && (
+      {actionFlash && (
         <Notice role="status" className="mt-3">
-          {t('employer.job.flash.closed')}
+          {t(`employer.job.flash.${actionFlash.key}`, { name: actionFlash.name })}
         </Notice>
       )}
 
@@ -171,11 +192,31 @@ export function EmployerJobPage() {
             )}
           </Card>
 
+          <section aria-labelledby="job-workers">
+            <h2 id="job-workers" className="text-2xl font-bold text-forest-900">
+              {t('employer.job.confirmedWorkers')} ({job.workersAssigned}/{job.workersRequired})
+            </h2>
+            <div className="mt-3">
+              {assignments.data && assignments.data.length === 0 && (
+                <StateView variant="empty" title={t('employer.job.noConfirmedWorkers')} />
+              )}
+              {assignments.data && assignments.data.length > 0 && (
+                <ul className="space-y-3">
+                  {assignments.data.map((assignment) => (
+                    <li key={assignment.id}>
+                      <AssignmentCard assignment={assignment} role="employer" />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
+
           <section aria-labelledby="job-applicants">
             <h2 id="job-applicants" className="text-2xl font-bold text-forest-900">
               {t('employer.applicants.title')} ({job.applicants.total})
             </h2>
-            <p className="mt-1 text-sm text-muted">{t('employer.applicants.viewOnlyNote')}</p>
+            <p className="mt-1 text-sm text-muted">{t('employer.applicants.contactNote')}</p>
             <div className="mt-3">
               {applicants.status === 'loading' && !applicants.data && <StateView variant="loading" title={t('common.loading')} />}
               {applicants.status === 'error' && <StateView variant="error" title={t('employer.applicants.loadError')} />}
@@ -186,7 +227,14 @@ export function EmployerJobPage() {
                 <ul className="space-y-3">
                   {applicants.data.map((applicant) => (
                     <li key={applicant.id}>
-                      <ApplicantCard applicant={applicant} categories={categories.data} />
+                      <ApplicantCard
+                        applicant={applicant}
+                        categories={categories.data}
+                        onDecided={(decision, result) => {
+                          setActionFlash({ key: decision === 'accept' ? 'accepted' : 'rejected', name: result.workerName });
+                          reloadAll();
+                        }}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -203,14 +251,14 @@ export function EmployerJobPage() {
               {t('employer.job.edit')}
             </Button>
           )}
+          {job.canEdit && !job.canEditDetails && (
+            <p className="text-xs text-muted">{t('employer.job.termsLocked')}</p>
+          )}
           {job.canClose && (
-            <CloseJobControl
-              jobId={job.id}
-              onClosed={() => {
-                setClosedFlash(true);
-                retry();
-              }}
-            />
+            <JobEndControl kind="close" jobId={job.id} onDone={(kind) => { setActionFlash({ key: kind === 'close' ? 'closed' : 'cancelled' }); reloadAll(); }} />
+          )}
+          {job.canCancel && (
+            <JobEndControl kind="cancel" jobId={job.id} onDone={() => { setActionFlash({ key: 'cancelled' }); reloadAll(); }} />
           )}
           {!job.canEdit && !job.canClose && <p className="text-sm text-muted">{t('employer.job.noActions')}</p>}
         </Card>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { CircleCheck, Lock, MapPin, Phone } from 'lucide-react';
 import { Card } from '../ui/Card.jsx';
@@ -76,6 +77,11 @@ export function ApplyPanel({ job, onChange }) {
             {t('applications.appliedOn', { date: formatTimestamp(application.appliedAt, i18n.resolvedLanguage) })}
           </p>
           <p className="mt-3 text-sm text-ink">{t(`applications.statusHelp.${application.status}`)}</p>
+          {application.assignmentId && (
+            <Button as={Link} to={`/worker/assignments/${application.assignmentId}`} fullWidth className="mt-4">
+              {t('applications.viewAssignment')}
+            </Button>
+          )}
           {application.status === 'pending' && (
             <div className="mt-4">
               <WithdrawControl

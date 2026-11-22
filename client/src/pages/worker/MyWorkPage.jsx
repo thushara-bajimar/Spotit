@@ -13,11 +13,12 @@ import { useApiData } from '../../hooks/useApiData.js';
 import { fetchMyApplications } from '../../services/workerService.js';
 import { formatTimestamp } from '../../utils/format.js';
 import { cx } from '../../utils/cx.js';
+import { AssignmentList } from '../../components/assignments/AssignmentList.jsx';
 
 const TABS = ['', 'pending', 'accepted', 'rejected', 'withdrawn'];
 
-/** "My Work": the worker's applications with status and withdrawal. */
-export function MyWorkPage() {
+/** The worker's applications with status and withdrawal. */
+function ApplicationsView() {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage;
   const [params, setParams] = useSearchParams();
@@ -32,11 +33,8 @@ export function MyWorkPage() {
   const countFor = (tab) => (counts ? (tab ? counts[tab] : total) : null);
 
   return (
-    <div className="mx-auto max-w-4xl">
-      <h1 className="text-3xl font-bold text-forest-900">{t('applications.title')}</h1>
-      <p className="mt-1 text-muted">{t('applications.subtitle')}</p>
-
-      <nav aria-label={t('applications.filterLabel')} className="-mx-4 mt-5 overflow-x-auto px-4 pb-1">
+    <div>
+      <nav aria-label={t('applications.filterLabel')} className="-mx-4 overflow-x-auto px-4 pb-1">
         <ul className="flex gap-2">
           {TABS.map((tab) => {
             const active = tab === statusFilter;
@@ -48,7 +46,7 @@ export function MyWorkPage() {
                   aria-pressed={active}
                   onClick={() => {
                     setFlash(false);
-                    setParams(tab ? { status: tab } : {}, { replace: true });
+                    setParams(tab ? { view: 'applications', status: tab } : { view: 'applications' }, { replace: true });
                   }}
                   className={cx(
                     'flex min-h-10 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold whitespace-nowrap transition-colors',
@@ -129,6 +127,11 @@ export function MyWorkPage() {
                     {t('applications.appliedOn', { date: formatTimestamp(application.appliedAt, language) })}
                   </p>
                   <div className="flex flex-wrap gap-2">
+                    {application.assignment && (
+                      <Button as={Link} to={`/worker/assignments/${application.assignment.id}`} size="sm">
+                        {t('applications.viewAssignment')}
+                      </Button>
+                    )}
                     {application.canWithdraw && (
                       <WithdrawControl
                         applicationId={application.id}
@@ -146,6 +149,57 @@ export function MyWorkPage() {
               </li>
             ))}
           </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const VIEWS = ['work', 'applications'];
+const GROUPS = ['active', 'completed', 'cancelled'];
+
+/**
+ * "My Work": confirmed work (assignments) and applications in two tabs.
+ * Links can open a tab directly: ?view=applications&status=pending
+ */
+export function MyWorkPage() {
+  const { t } = useTranslation();
+  const [params, setParams] = useSearchParams();
+  const view = VIEWS.includes(params.get('view')) ? params.get('view') : params.get('status') ? 'applications' : 'work';
+  const group = GROUPS.includes(params.get('group')) ? params.get('group') : 'active';
+
+  return (
+    <div className="mx-auto max-w-4xl">
+      <h1 className="text-3xl font-bold text-forest-900">{t('myWork.title')}</h1>
+      <p className="mt-1 text-muted">{t('myWork.subtitle')}</p>
+
+      <div role="tablist" aria-label={t('myWork.title')} className="mt-5 grid grid-cols-2 rounded-xl border border-line bg-white p-1">
+        {VIEWS.map((v) => (
+          <button
+            key={v}
+            type="button"
+            role="tab"
+            aria-selected={v === view}
+            onClick={() => setParams(v === 'work' ? {} : { view: v }, { replace: true })}
+            className={cx(
+              'min-h-11 rounded-lg px-3 text-sm font-semibold transition-colors',
+              v === view ? 'bg-forest-700 text-white' : 'text-ink hover:bg-forest-50',
+            )}
+          >
+            {t(`myWork.tabs.${v}`)}
+          </button>
+        ))}
+      </div>
+
+      <div role="tabpanel" className="mt-5">
+        {view === 'work' ? (
+          <AssignmentList
+            role="worker"
+            group={group}
+            onGroupChange={(g) => setParams(g === 'active' ? {} : { group: g }, { replace: true })}
+          />
+        ) : (
+          <ApplicationsView />
         )}
       </div>
     </div>

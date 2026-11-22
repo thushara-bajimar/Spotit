@@ -32,7 +32,9 @@ export function EditJobPage() {
         initialValues={jobToFormValues(job)}
         submitLabel={job.approvalStatus === 'approved' ? t('employer.edit.submitApproved') : t('employer.edit.submit')}
         notice={
-          job.approvalStatus === 'approved' ? (
+          !job.canEditDetails ? (
+            <Notice tone="warning">{t('employer.edit.termsLocked')}</Notice>
+          ) : job.approvalStatus === 'approved' ? (
             <Notice tone="warning">{t('employer.edit.reviewWarning')}</Notice>
           ) : job.approvalStatus === 'rejected' ? (
             <Notice tone="warning">{t('employer.edit.resubmitNote', { reason: job.rejectionReason })}</Notice>

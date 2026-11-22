@@ -21,6 +21,8 @@ import { EditJobPage } from '../pages/employer/EditJobPage.jsx';
 import { PostJobPage } from '../pages/employer/PostJobPage.jsx';
 import { ApplicantsPage } from '../pages/employer/ApplicantsPage.jsx';
 import { EmployerProfilePage } from '../pages/employer/EmployerProfilePage.jsx';
+import { EmployerAssignmentsPage } from '../pages/employer/EmployerAssignmentsPage.jsx';
+import { EmployerAssignmentPage, WorkerAssignmentPage } from '../pages/assignments/AssignmentPages.jsx';
 import { PlaceholderPage } from '../pages/dashboard/PlaceholderPage.jsx';
 import { NotFoundPage } from '../pages/NotFoundPage.jsx';
 import { adminNav, employerNotifications, workerNav } from './navigation.js';
@@ -80,6 +82,7 @@ export const router = createBrowserRouter([
               { path: 'jobs', element: <JobsPage /> },
               { path: 'jobs/:jobId', element: <JobDetailsPage /> },
               { path: 'my-work', element: <MyWorkPage /> },
+              { path: 'assignments/:assignmentId', element: <WorkerAssignmentPage /> },
               { path: 'profile', element: <WorkerProfilePage /> },
               // Still planned (see navigation.js for the phase).
               ...placeholderRoutes(workerNav.filter((item) => item.segment === 'notifications')),
@@ -100,6 +103,8 @@ export const router = createBrowserRouter([
               { path: 'jobs/:jobId/edit', element: <EditJobPage /> },
               { path: 'post-job', element: <PostJobPage /> },
               { path: 'applicants', element: <ApplicantsPage /> },
+              { path: 'assignments', element: <EmployerAssignmentsPage /> },
+              { path: 'assignments/:assignmentId', element: <EmployerAssignmentPage /> },
               { path: 'profile', element: <EmployerProfilePage /> },
               // Still planned (see navigation.js for the phase).
               ...placeholderRoutes([employerNotifications]),

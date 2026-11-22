@@ -38,6 +38,19 @@ export async function closeJobRequest(jobId, reason) {
     .job;
 }
 
+export async function cancelJobRequest(jobId, reason) {
+  return (await apiRequest(`/employer/jobs/${id(jobId)}/cancel`, { method: 'POST', body: { reason } })).job;
+}
+
+/** Returns { assignmentId, job }. */
+export function acceptApplicationRequest(jobId, applicationId) {
+  return apiRequest(`/employer/jobs/${id(jobId)}/applications/${id(applicationId)}/accept`, { method: 'POST' });
+}
+
+export function rejectApplicationRequest(jobId, applicationId) {
+  return apiRequest(`/employer/jobs/${id(jobId)}/applications/${id(applicationId)}/reject`, { method: 'POST' });
+}
+
 export async function fetchApplicants({ jobId, status } = {}, { signal } = {}) {
   const query = new URLSearchParams();
   if (jobId) query.set('jobId', jobId);

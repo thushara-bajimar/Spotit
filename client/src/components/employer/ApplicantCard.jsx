@@ -1,15 +1,86 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { MapPin, MessageSquare, UserRound } from 'lucide-react';
+import { MapPin, MessageSquare, Phone, UserRound } from 'lucide-react';
 import { ApplicationStatusBadge } from '../jobs/ApplicationStatusBadge.jsx';
 import { CategoryIcon } from '../common/CategoryIcon.jsx';
+import { Button } from '../ui/Button.jsx';
+import { FormError } from '../forms/FormError.jsx';
+import { acceptApplicationRequest, rejectApplicationRequest } from '../../services/employerService.js';
 import { formatTimestamp, localName } from '../../utils/format.js';
+import { cx } from '../../utils/cx.js';
+
+/** Accept / reject with an inline confirmation step. */
+function DecisionControls({ applicant, onDecided }) {
+  const { t } = useTranslation();
+  const [confirming, setConfirming] = useState(null); // 'accept' | 'reject'
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+
+  const decide = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const request = confirming === 'accept' ? acceptApplicationRequest : rejectApplicationRequest;
+      const result = await request(applicant.job.id, applicant.id);
+      onDecided?.(confirming, { ...result, workerName: applicant.worker.name });
+    } catch (err) {
+      setError(err);
+      setBusy(false);
+    }
+  };
+
+  const errorText =
+    error?.code === 'JOB_UNAVAILABLE' && error.details?.reason
+      ? t(`jobs.unavailable.${error.details.reason}`)
+      : null;
+
+  if (!confirming) {
+    return (
+      <div className="mt-4 flex flex-wrap gap-2">
+        {applicant.canAccept && (
+          <Button size="sm" onClick={() => setConfirming('accept')}>
+            {t('employer.applicants.accept')}
+          </Button>
+        )}
+        {applicant.canReject && (
+          <Button size="sm" variant="secondary" onClick={() => setConfirming('reject')}>
+            {t('employer.applicants.reject')}
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cx(
+        'mt-4 rounded-xl border p-3',
+        confirming === 'accept' ? 'border-forest-200 bg-forest-50' : 'border-amber-300 bg-amber-100',
+      )}
+    >
+      <p className="text-sm font-semibold text-ink">
+        {t(`employer.applicants.${confirming}Confirm`, { name: applicant.worker.name })}
+      </p>
+      <p className="mt-1 text-sm text-ink">{t(`employer.applicants.${confirming}Explain`)}</p>
+      {error && (errorText ? <p className="mt-2 text-sm font-medium text-danger-700">{errorText}</p> : <FormError code={error.code} className="mt-2" />)}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button size="sm" onClick={decide} disabled={busy}>
+          {t(`employer.applicants.${confirming}Yes`)}
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => setConfirming(null)} disabled={busy}>
+          {t('common.cancel')}
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 /**
  * One applicant, as an employer sees them: name, area, the work they can do
- * and their message. Phone numbers are shared only after acceptance (Phase 5).
+ * and their message. The phone number appears once they are accepted.
  */
-export function ApplicantCard({ applicant, categories, showJob = false }) {
+export function ApplicantCard({ applicant, categories, showJob = false, onDecided }) {
   const { t, i18n } = useTranslation();
   const language = i18n.resolvedLanguage;
   const { worker } = applicant;
@@ -63,9 +134,33 @@ export function ApplicantCard({ applicant, categories, showJob = false }) {
         </blockquote>
       )}
 
-      <p className="mt-3 text-xs text-muted">
-        {t('applications.appliedOn', { date: formatTimestamp(applicant.appliedAt, language) })}
-      </p>
+      {worker.phone && (
+        <p className="mt-3 flex items-center gap-2 text-sm">
+          <Phone aria-hidden="true" className="size-4 text-forest-500" />
+          <a href={`tel:+91${worker.phone}`} className="font-semibold text-forest-700 underline">
+            {worker.phone}
+          </a>
+        </p>
+      )}
+
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted">
+          {t('applications.appliedOn', { date: formatTimestamp(applicant.appliedAt, language) })}
+        </p>
+        {applicant.assignment && (
+          <Link
+            to={`/employer/assignments/${applicant.assignment.id}`}
+            className="text-sm font-semibold text-forest-700 hover:underline"
+          >
+            {t('employer.applicants.viewAssignment')}
+          </Link>
+        )}
+      </div>
+
+      {(applicant.canAccept || applicant.canReject) && <DecisionControls applicant={applicant} onDecided={onDecided} />}
+      {applicant.status === 'pending' && !applicant.canAccept && (
+        <p className="mt-3 text-sm text-muted">{t('employer.applicants.cannotAcceptNow')}</p>
+      )}
     </article>
   );
 }

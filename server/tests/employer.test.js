@@ -238,7 +238,7 @@ describe('my jobs, details and dashboard', () => {
 
     const dash = await me.get('/api/employer/dashboard');
     expect(dash.body.stats).toEqual({
-      totalJobs: 2, pendingApproval: 1, live: 1, rejected: 0, filled: 0, ended: 0, pendingApplicants: 1,
+      totalJobs: 2, pendingApproval: 1, live: 1, rejected: 0, filled: 0, ended: 0, activeAssignments: 0, pendingApplicants: 1,
     });
     expect(dash.body.recentJobs).toHaveLength(2);
   });
@@ -368,7 +368,7 @@ describe('closing jobs', () => {
 });
 
 describe('applicants', () => {
-  it('lists applicants for my jobs with profile details but no phone number', async () => {
+  it('lists applicants for my jobs with profile details, phone hidden until accepted', async () => {
     const agent = await employerAgent();
     const jobId = (await agent.post('/api/employer/jobs').send(validJob())).body.job.id;
     approve(jobId);
@@ -389,7 +389,9 @@ describe('applicants', () => {
         skills: ['cleaning'],
       },
     });
-    expect(JSON.stringify(res.body)).not.toMatch(/phone|password/i);
+    // Phone is only shared after acceptance; passwords never.
+    expect(res.body.applicants[0].worker.phone).toBeNull();
+    expect(JSON.stringify(res.body)).not.toMatch(/password/i);
 
     const job = await agent.get(`/api/employer/jobs/${jobId}`);
     expect(job.body.job.applicants).toEqual({ total: 1, pending: 1 });
